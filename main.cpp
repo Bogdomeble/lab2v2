@@ -18,7 +18,7 @@ int main() {
     try {
         // Call the function for the test problem or the real problem
         lab1();
-        // test_real_problem_DA50();
+         test_real_problem_DA50();
         lab1_real();
     } catch (string EX_INFO) {
         cerr << "ERROR:\n";
