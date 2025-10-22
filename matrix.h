@@ -8,6 +8,8 @@
 #include<fstream>
 #include<random>
 #include<chrono>
+#include<memory>
+
 using namespace std;
 
 

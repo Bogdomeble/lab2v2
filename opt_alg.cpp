@@ -59,7 +59,7 @@ double *expansion(matrix (*ff)(matrix, matrix, matrix), double x0, double d, dou
 
         while (true) {
             if (solution::f_calls >= Nmax) {
-                throw string("Przekroczono maksymalna liczbe wywolan funkcji celu w expansion.");
+                throw string("Maximum number of calls to target function in method exceeded.");
             }
 
             s_curr.x = x0 + pow(alpha, i) * d;
@@ -157,7 +157,7 @@ solution lag(matrix (*ff)(matrix, matrix, matrix), double a, double b, double ep
             double m = A.y(0) * (B.x(0) - C.x(0)) + B.y(0) * (C.x(0) - A.x(0)) + C.y(0) * (A.x(0) - B.x(0));
 
             if (m <= 0) {
-                throw string("Blad w metodzie Lagrange'a: m <= 0. Parabola jest skierowana w zla strone.");
+                throw string("Error in Lagrange's method: m <= 0. The parabola is directed in the wrong direction.");
             }
 
             double d_val = 0.5 * l / m;
@@ -189,7 +189,7 @@ solution lag(matrix (*ff)(matrix, matrix, matrix), double a, double b, double ep
                     B = D;
                 }
             } else {
-                throw string("Blad w metodzie Lagrange'a: nowy punkt D wypadl poza przedzial [A, B].");
+                throw string("Error in Lagrange's method: the new point D fell outside the interval [A, B].");
             }
         }
     } catch (string ex_info) {
