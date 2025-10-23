@@ -140,16 +140,44 @@ matrix dff1R(double t, matrix Y, matrix ud1, matrix ud2) {
 }
 
 
-double ff2T(matrix x1, matrix ud1, matrix ud2) {
+matrix ff2T(matrix x1, matrix ud1, matrix ud2) {
+    double x1 = x(0);
 
-    double x1_val = x1(0); // Extract the value from the matrix
+    double x2 = x(1);
 
-    double x2_val = x1(1); // Extract the value from the matrix
+    double val = pow(x1, 2) + pow(x2, 2) - cos(2.5 * M_PI * x1) - cos(2.5 * M_PI * x2) + 2;
 
-    double term1 = pow(x1_val, 2) + pow(x2_val, 2);
-
-    double term2 = -cos(2.5* M_PI * x1_val) - cos(2.5 * M_PI * x2_val) + 2.0;
-
-    return {term1 + term2};
+    return matrix(val);
 }
 
+matrix df2R(double t, matrix Y, matrix ud1, matrix ud2)
+{
+    // Model constants
+    double b = 0.25;  // Friction coefficient
+    double mr = 1.0;  // Mass of the arm
+    double mc = 5.0;  // Mass of the weight
+    double l = 2.0;   // Length of the arm
+    double I = (1.0/3.0) * mr * pow(l, 2) + mc * pow(l, 2); // Moment of inertia
+
+    // Control parameters (k1, k2) are passed via ud2
+    double k1 = ud2(0);
+    double k2 = ud2(1);
+
+    // Target values
+    double aref = M_PI;
+    double wref = 0;
+
+    // Current state from Y vector
+    double alpha = Y(0); // Current angle
+    double omega = Y(1); // Current angular velocity
+
+    // Calculate the torque M(t)
+    double M = k1 * (aref - alpha) + k2 * (wref - omega);
+
+    // Define the system of 2 first-order ODEs
+    matrix dY(2, 1);
+    dY(0) = omega; // d(alpha)/dt = omega
+    dY(1) = (M - b * omega) / I; // d(omega)/dt = (M - b*omega)/I
+
+    return dY;
+}
