@@ -1,3 +1,4 @@
+//opt_alg.cpp
 #include"opt_alg.h"
 
 solution MC(matrix (*ff)(matrix, matrix, matrix), int N, matrix lb, matrix ub, double epsilon, int Nmax, matrix ud1,
@@ -108,6 +109,12 @@ solution fib(matrix (*ff)(matrix, matrix, matrix), double a, double b, double ep
         C.fit_fun(ff, ud1, ud2);
         D.fit_fun(ff, ud1, ud2);
 
+        // --- ADDED FOR PLOTTING ---
+        // These lines will print the data needed for the chart.
+        //cout << "--- Fibonacci Interval Lengths ---" << endl;
+        //cout << "Iteration,Interval_Length" << endl;
+        //cout << 0 << "," << (B.x(0) - A.x(0)) << endl; // Print initial state
+        // --------------------------
 
         for (int i = 0; i <= k - 3; ++i) {
             if (C.y < D.y) {
@@ -123,6 +130,10 @@ solution fib(matrix (*ff)(matrix, matrix, matrix), double a, double b, double ep
                 D.x = A.x + B.x - C.x;
                 D.fit_fun(ff, ud1, ud2);
             }
+            // --- ADDED FOR PLOTTING ---
+            // This prints the interval length at the end of each iteration.
+            //cout << i + 1 << "," << (B.x(0) - A.x(0)) << endl;
+            // --------------------------
         }
 
 
@@ -145,12 +156,18 @@ solution lag(matrix (*ff)(matrix, matrix, matrix), double a, double b, double ep
         solution D;
         double d_prev = NAN;
 
+        // --- ADDED FOR PLOTTING ---
+        //int iteration = 0;
+        //cout << "--- Lagrange Interval Lengths ---" << endl;
+        //cout << "Iteration,Interval_Length" << endl;
+        //cout << iteration << "," << (B.x(0) - A.x(0)) << endl; // Print initial state
+        // --------------------------
+
         while (true) {
             if (solution::f_calls > Nmax) {
                 D.flag = 0;
                 return D;
             }
-
 
             double l = A.y(0) * (pow(B.x(0), 2) - pow(C.x(0), 2)) + B.y(0) * (pow(C.x(0), 2) - pow(A.x(0), 2)) + C.y(0)
                        * (pow(A.x(0), 2) - pow(B.x(0), 2));
@@ -162,7 +179,6 @@ solution lag(matrix (*ff)(matrix, matrix, matrix), double a, double b, double ep
 
             double d_val = 0.5 * l / m;
             D.x = d_val;
-
 
             if (abs(B.x(0) - A.x(0)) < epsilon || (!isnan(d_prev) && abs(d_val - d_prev) < gamma)) {
                 D.flag = 1;
@@ -191,6 +207,11 @@ solution lag(matrix (*ff)(matrix, matrix, matrix), double a, double b, double ep
             } else {
                 throw string("Error in Lagrange's method: the new point D fell outside the interval [A, B].");
             }
+            
+            // --- ADDED FOR PLOTTING ---
+            //iteration++;
+            //cout << iteration << "," << (B.x(0) - A.x(0)) << endl;
+            // --------------------------
         }
     } catch (string ex_info) {
         throw ("solution lag(...):\n" + ex_info);

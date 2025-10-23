@@ -17,9 +17,9 @@ void lab6();
 int main() {
     try {
         // Call the function for the test problem or the real problem
-        lab1();
-         test_real_problem_DA50();
-        lab1_real();
+        //lab1();
+        //test_real_problem_DA50();
+        //lab1_real();
     } catch (string EX_INFO) {
         cerr << "ERROR:\n";
         cerr << EX_INFO << endl << endl;
@@ -83,15 +83,15 @@ void lab1() {
 
     // Define constant parameters
     double d = 1.0;
-    double alpha = 1.2;
+    double alpha = 1.7;
     int Nmax = 200;
     double epsilon = 1e-5;
-    double gamma = 1e-5;
+    double gamma = 1e-8;
     double full_interval_a = -100.0;
     double full_interval_b = 100.0;
 
     // Main loop for 100 iterations
-    for (int i = 0; i < 100; ++i) {
+    for (int i = 0; i < 1; ++i) {
         cout << "Performing iteration no: " << i + 1 << "/100" << endl;
 
         // 1. Draw a random starting point x0 from the interval [-100, 100]
@@ -158,8 +158,8 @@ void lab1() {
 void lab1_real()
 {
     // Optimization parameters
-    double epsilon = 1e-3;
-    double gamma = 1e-3;
+    double epsilon = 1e-5;
+    double gamma = 1e-9;
     int Nmax = 100;
 
     // Search interval for DA [1, 100] cm^2
@@ -190,7 +190,7 @@ void lab1_real()
     matrix params_fib(1, 1);
     params_fib(0) = DA_opt_fib;
 
-    matrix* Y_fib = solve_ode(dff1R, 0, 100, 2000, Y0, NAN, params_fib);
+    matrix* Y_fib = solve_ode(dff1R, 0, 1, 2000, Y0, NAN, params_fib);
 
     // Save Fibonacci simulation results to a file
     ofstream sim_file_fib("lab_1_real_fibonacci.csv");
@@ -216,7 +216,7 @@ void lab1_real()
     matrix params_lag(1, 1);
     params_lag(0) = DA_opt_lag;
 
-    matrix* Y_lag = solve_ode(dff1R, 0, 100, 2000, Y0, NAN, params_lag);
+    matrix* Y_lag = solve_ode(dff1R, 0, 1, 2000, Y0, NAN, params_lag);
 
     // Save Lagrange simulation results to a file
     ofstream sim_file_lag("lab_1_real_lagrange.csv");

@@ -1,7 +1,7 @@
 #include "user_funs.h"
 #include <cmath>
 #include <vector>
-
+#define _USE_MATH_DEFINES
 // --- Lab 0 Functions ---
 
 // Objective function for the test case
@@ -138,3 +138,18 @@ matrix dff1R(double t, matrix Y, matrix ud1, matrix ud2) {
 
     return dY;
 }
+
+
+double ff2T(matrix x1, matrix ud1, matrix ud2) {
+
+    double x1_val = x1(0); // Extract the value from the matrix
+
+    double x2_val = x1(1); // Extract the value from the matrix
+
+    double term1 = pow(x1_val, 2) + pow(x2_val, 2);
+
+    double term2 = -cos(2.5* M_PI * x1_val) - cos(2.5 * M_PI * x2_val) + 2.0;
+
+    return {term1 + term2};
+}
+
