@@ -140,7 +140,7 @@ matrix dff1R(double t, matrix Y, matrix ud1, matrix ud2) {
 }
 
 
-matrix ff2T(matrix x1, matrix ud1, matrix ud2) {
+matrix ff2T(matrix x, matrix ud1, matrix ud2) {
     double x1 = x(0);
 
     double x2 = x(1);
