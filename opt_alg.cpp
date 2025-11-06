@@ -207,7 +207,7 @@ solution lag(matrix (*ff)(matrix, matrix, matrix), double a, double b, double ep
             } else {
                 throw string("Error in Lagrange's method: the new point D fell outside the interval [A, B].");
             }
-            
+
             // --- ADDED FOR PLOTTING ---
             //iteration++;
             //cout << iteration << "," << (B.x(0) - A.x(0)) << endl;
@@ -308,7 +308,7 @@ solution Rosen(matrix (*ff)(matrix, matrix, matrix), matrix x0, matrix s0, doubl
                     s(j) *= -beta;
                 }
             }
-            
+
             bool change_basis = true;
             for(int j=0; j<n; ++j) {
                 if(lambda(j) == 0 || p(j) == 0) {
@@ -338,8 +338,8 @@ solution Rosen(matrix (*ff)(matrix, matrix, matrix), matrix x0, matrix s0, doubl
                     D.set_col(v / norm(v), j);
                 }
                 s = s0;
-                lambda = 0;
-                p = 0;
+                lambda = matrix(n,1,0.0);
+                p = matrix(n,1,0.0);
             }
 
             if(solution::f_calls > Nmax) {
@@ -348,7 +348,7 @@ solution Rosen(matrix (*ff)(matrix, matrix, matrix), matrix x0, matrix s0, doubl
             }
 
         } while (norm(s) > epsilon);
-        
+
         X.flag = 1;
         return X;
     } catch (string ex_info) {

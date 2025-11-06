@@ -20,6 +20,7 @@ int main() {
         //lab1();
         //test_real_problem_DA50();
         //lab1_real();
+         lab2();
     } catch (string EX_INFO) {
         cerr << "ERROR:\n";
         cerr << EX_INFO << endl << endl;
@@ -231,6 +232,87 @@ void lab1_real()
 }
 
 void lab2() {
+
+    srand(time(nullptr));
+
+
+    ofstream file("lab2_results.csv");
+    if (!file.is_open()) {
+        cerr << "ERROR: Nie mozna otworzyc pliku lab2_results.csv do zapisu!" << endl;
+        return;
+    }
+
+
+    file << "Iteracja,Krok_startowy,x0_start,x1_start,"
+         << "HJ_x0_end,HJ_x1_end,HJ_y_end,HJ_f_calls,"
+         << "Rosen_x0_end,Rosen_x1_end,Rosen_y_end,Rosen_f_calls\n";
+
+
+
+    double epsilon = 1e-5;
+    int Nmax = 20000;
+
+
+    double alpha_hj = 0.5;
+
+
+    matrix s0_rosen(2, 1);
+    s0_rosen(0) = 0.5;
+    s0_rosen(1) = 0.5;
+    double alpha_rosen = 2.0;
+    double beta_rosen = 0.5;
+
+
+    vector<double> kroki_startowe = {0.5, 0.25, 0.1};
+
+    int global_iteration_count = 1;
+
+
+    for (double start_s : kroki_startowe) {
+        cout << "--- Rozpoczynam testy dla kroku startowego s = " << start_s << " ---" << endl;
+
+
+        for (int i = 0; i < 100; ++i) {
+            cout << "   Wykonuje iteracje nr: " << i + 1 << "/100" << endl;
+
+
+            matrix x0(2, 1);
+            x0(0) = -1.0 + (double)rand() / RAND_MAX * 2.0;
+            x0(1) = -1.0 + (double)rand() / RAND_MAX * 2.0;
+
+            solution sol_hj, sol_rosen;
+            int hj_calls = 0, rosen_calls = 0;
+
+
+            try {
+                solution::clear_calls();
+                sol_hj = HJ(&ff2T, x0, start_s, alpha_hj, epsilon, Nmax);
+                hj_calls = solution::f_calls;
+            } catch (const string& ex) {
+                cerr << "   Blad w metodzie Hooke-Jeevesa: " << ex << endl;
+
+            }
+
+
+            try {
+                solution::clear_calls();
+                sol_rosen = Rosen(&ff2T, x0, s0_rosen, alpha_rosen, beta_rosen, epsilon, Nmax);
+                rosen_calls = solution::f_calls;
+            } catch (const string& ex) {
+                cerr << "   Blad w metodzie Rosenbrocka: " << ex << endl;
+            }
+
+
+            file << global_iteration_count++ << "," << start_s << ","
+                 << x0(0) << "," << x0(1) << ","
+                 << sol_hj.x(0) << "," << sol_hj.x(1) << "," << sol_hj.y(0) << "," << hj_calls << ","
+                 << sol_rosen.x(0) << "," << sol_rosen.x(1) << "," << sol_rosen.y(0) << "," << rosen_calls << "\n";
+        }
+    }
+
+
+    file.close();
+    cout << "\nZakonczono. Wyniki zostaly zapisane do pliku lab2_results.csv" << endl;
 }
 
 void lab3() {
@@ -244,7 +326,7 @@ void lab5() {
 
 void lab6() {
 }
-// Add this function alongside your other lab functions
+
 void test_real_problem_DA50()
 {
     cout << "\n--- Running Test for DA = 50 cm^2 ---" << endl;
