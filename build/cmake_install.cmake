@@ -1,4 +1,4 @@
-# Install script for directory: /workspaces/lab2v2
+# Install script for directory: /mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/workspaces/lab2v2/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

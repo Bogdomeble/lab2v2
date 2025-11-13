@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /workspaces/lab2v2
+CMAKE_SOURCE_DIR = "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /workspaces/lab2v2/build
+CMAKE_BINARY_DIR = "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/build"
 
 # Include any dependencies generated for this target.
 include CMakeFiles/lab2.dir/depend.make
@@ -69,111 +69,111 @@ include CMakeFiles/lab2.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/lab2.dir/flags.make
 
-CMakeFiles/lab2.dir/main.cpp.o: CMakeFiles/lab2.dir/flags.make
-CMakeFiles/lab2.dir/main.cpp.o: /workspaces/lab2v2/main.cpp
-CMakeFiles/lab2.dir/main.cpp.o: CMakeFiles/lab2.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspaces/lab2v2/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/lab2.dir/main.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/lab2.dir/main.cpp.o -MF CMakeFiles/lab2.dir/main.cpp.o.d -o CMakeFiles/lab2.dir/main.cpp.o -c /workspaces/lab2v2/main.cpp
+CMakeFiles/lab2.dir/src/main.cpp.o: CMakeFiles/lab2.dir/flags.make
+CMakeFiles/lab2.dir/src/main.cpp.o: /mnt/e/Moje\ Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/main.cpp
+CMakeFiles/lab2.dir/src/main.cpp.o: CMakeFiles/lab2.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/lab2.dir/src/main.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/lab2.dir/src/main.cpp.o -MF CMakeFiles/lab2.dir/src/main.cpp.o.d -o CMakeFiles/lab2.dir/src/main.cpp.o -c "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/main.cpp"
 
-CMakeFiles/lab2.dir/main.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lab2.dir/main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspaces/lab2v2/main.cpp > CMakeFiles/lab2.dir/main.cpp.i
+CMakeFiles/lab2.dir/src/main.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lab2.dir/src/main.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/main.cpp" > CMakeFiles/lab2.dir/src/main.cpp.i
 
-CMakeFiles/lab2.dir/main.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lab2.dir/main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspaces/lab2v2/main.cpp -o CMakeFiles/lab2.dir/main.cpp.s
+CMakeFiles/lab2.dir/src/main.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lab2.dir/src/main.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/main.cpp" -o CMakeFiles/lab2.dir/src/main.cpp.s
 
-CMakeFiles/lab2.dir/matrix.cpp.o: CMakeFiles/lab2.dir/flags.make
-CMakeFiles/lab2.dir/matrix.cpp.o: /workspaces/lab2v2/matrix.cpp
-CMakeFiles/lab2.dir/matrix.cpp.o: CMakeFiles/lab2.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspaces/lab2v2/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/lab2.dir/matrix.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/lab2.dir/matrix.cpp.o -MF CMakeFiles/lab2.dir/matrix.cpp.o.d -o CMakeFiles/lab2.dir/matrix.cpp.o -c /workspaces/lab2v2/matrix.cpp
+CMakeFiles/lab2.dir/src/matrix.cpp.o: CMakeFiles/lab2.dir/flags.make
+CMakeFiles/lab2.dir/src/matrix.cpp.o: /mnt/e/Moje\ Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/matrix.cpp
+CMakeFiles/lab2.dir/src/matrix.cpp.o: CMakeFiles/lab2.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/lab2.dir/src/matrix.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/lab2.dir/src/matrix.cpp.o -MF CMakeFiles/lab2.dir/src/matrix.cpp.o.d -o CMakeFiles/lab2.dir/src/matrix.cpp.o -c "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/matrix.cpp"
 
-CMakeFiles/lab2.dir/matrix.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lab2.dir/matrix.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspaces/lab2v2/matrix.cpp > CMakeFiles/lab2.dir/matrix.cpp.i
+CMakeFiles/lab2.dir/src/matrix.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lab2.dir/src/matrix.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/matrix.cpp" > CMakeFiles/lab2.dir/src/matrix.cpp.i
 
-CMakeFiles/lab2.dir/matrix.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lab2.dir/matrix.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspaces/lab2v2/matrix.cpp -o CMakeFiles/lab2.dir/matrix.cpp.s
+CMakeFiles/lab2.dir/src/matrix.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lab2.dir/src/matrix.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/matrix.cpp" -o CMakeFiles/lab2.dir/src/matrix.cpp.s
 
-CMakeFiles/lab2.dir/ode_solver.cpp.o: CMakeFiles/lab2.dir/flags.make
-CMakeFiles/lab2.dir/ode_solver.cpp.o: /workspaces/lab2v2/ode_solver.cpp
-CMakeFiles/lab2.dir/ode_solver.cpp.o: CMakeFiles/lab2.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspaces/lab2v2/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/lab2.dir/ode_solver.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/lab2.dir/ode_solver.cpp.o -MF CMakeFiles/lab2.dir/ode_solver.cpp.o.d -o CMakeFiles/lab2.dir/ode_solver.cpp.o -c /workspaces/lab2v2/ode_solver.cpp
+CMakeFiles/lab2.dir/src/ode_solver.cpp.o: CMakeFiles/lab2.dir/flags.make
+CMakeFiles/lab2.dir/src/ode_solver.cpp.o: /mnt/e/Moje\ Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/ode_solver.cpp
+CMakeFiles/lab2.dir/src/ode_solver.cpp.o: CMakeFiles/lab2.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/lab2.dir/src/ode_solver.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/lab2.dir/src/ode_solver.cpp.o -MF CMakeFiles/lab2.dir/src/ode_solver.cpp.o.d -o CMakeFiles/lab2.dir/src/ode_solver.cpp.o -c "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/ode_solver.cpp"
 
-CMakeFiles/lab2.dir/ode_solver.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lab2.dir/ode_solver.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspaces/lab2v2/ode_solver.cpp > CMakeFiles/lab2.dir/ode_solver.cpp.i
+CMakeFiles/lab2.dir/src/ode_solver.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lab2.dir/src/ode_solver.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/ode_solver.cpp" > CMakeFiles/lab2.dir/src/ode_solver.cpp.i
 
-CMakeFiles/lab2.dir/ode_solver.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lab2.dir/ode_solver.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspaces/lab2v2/ode_solver.cpp -o CMakeFiles/lab2.dir/ode_solver.cpp.s
+CMakeFiles/lab2.dir/src/ode_solver.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lab2.dir/src/ode_solver.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/ode_solver.cpp" -o CMakeFiles/lab2.dir/src/ode_solver.cpp.s
 
-CMakeFiles/lab2.dir/solution.cpp.o: CMakeFiles/lab2.dir/flags.make
-CMakeFiles/lab2.dir/solution.cpp.o: /workspaces/lab2v2/solution.cpp
-CMakeFiles/lab2.dir/solution.cpp.o: CMakeFiles/lab2.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspaces/lab2v2/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/lab2.dir/solution.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/lab2.dir/solution.cpp.o -MF CMakeFiles/lab2.dir/solution.cpp.o.d -o CMakeFiles/lab2.dir/solution.cpp.o -c /workspaces/lab2v2/solution.cpp
+CMakeFiles/lab2.dir/src/solution.cpp.o: CMakeFiles/lab2.dir/flags.make
+CMakeFiles/lab2.dir/src/solution.cpp.o: /mnt/e/Moje\ Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/solution.cpp
+CMakeFiles/lab2.dir/src/solution.cpp.o: CMakeFiles/lab2.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/lab2.dir/src/solution.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/lab2.dir/src/solution.cpp.o -MF CMakeFiles/lab2.dir/src/solution.cpp.o.d -o CMakeFiles/lab2.dir/src/solution.cpp.o -c "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/solution.cpp"
 
-CMakeFiles/lab2.dir/solution.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lab2.dir/solution.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspaces/lab2v2/solution.cpp > CMakeFiles/lab2.dir/solution.cpp.i
+CMakeFiles/lab2.dir/src/solution.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lab2.dir/src/solution.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/solution.cpp" > CMakeFiles/lab2.dir/src/solution.cpp.i
 
-CMakeFiles/lab2.dir/solution.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lab2.dir/solution.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspaces/lab2v2/solution.cpp -o CMakeFiles/lab2.dir/solution.cpp.s
+CMakeFiles/lab2.dir/src/solution.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lab2.dir/src/solution.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/solution.cpp" -o CMakeFiles/lab2.dir/src/solution.cpp.s
 
-CMakeFiles/lab2.dir/opt_alg.cpp.o: CMakeFiles/lab2.dir/flags.make
-CMakeFiles/lab2.dir/opt_alg.cpp.o: /workspaces/lab2v2/opt_alg.cpp
-CMakeFiles/lab2.dir/opt_alg.cpp.o: CMakeFiles/lab2.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspaces/lab2v2/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/lab2.dir/opt_alg.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/lab2.dir/opt_alg.cpp.o -MF CMakeFiles/lab2.dir/opt_alg.cpp.o.d -o CMakeFiles/lab2.dir/opt_alg.cpp.o -c /workspaces/lab2v2/opt_alg.cpp
+CMakeFiles/lab2.dir/src/opt_alg.cpp.o: CMakeFiles/lab2.dir/flags.make
+CMakeFiles/lab2.dir/src/opt_alg.cpp.o: /mnt/e/Moje\ Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/opt_alg.cpp
+CMakeFiles/lab2.dir/src/opt_alg.cpp.o: CMakeFiles/lab2.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/lab2.dir/src/opt_alg.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/lab2.dir/src/opt_alg.cpp.o -MF CMakeFiles/lab2.dir/src/opt_alg.cpp.o.d -o CMakeFiles/lab2.dir/src/opt_alg.cpp.o -c "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/opt_alg.cpp"
 
-CMakeFiles/lab2.dir/opt_alg.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lab2.dir/opt_alg.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspaces/lab2v2/opt_alg.cpp > CMakeFiles/lab2.dir/opt_alg.cpp.i
+CMakeFiles/lab2.dir/src/opt_alg.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lab2.dir/src/opt_alg.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/opt_alg.cpp" > CMakeFiles/lab2.dir/src/opt_alg.cpp.i
 
-CMakeFiles/lab2.dir/opt_alg.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lab2.dir/opt_alg.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspaces/lab2v2/opt_alg.cpp -o CMakeFiles/lab2.dir/opt_alg.cpp.s
+CMakeFiles/lab2.dir/src/opt_alg.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lab2.dir/src/opt_alg.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/opt_alg.cpp" -o CMakeFiles/lab2.dir/src/opt_alg.cpp.s
 
-CMakeFiles/lab2.dir/user_funs.cpp.o: CMakeFiles/lab2.dir/flags.make
-CMakeFiles/lab2.dir/user_funs.cpp.o: /workspaces/lab2v2/user_funs.cpp
-CMakeFiles/lab2.dir/user_funs.cpp.o: CMakeFiles/lab2.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/workspaces/lab2v2/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/lab2.dir/user_funs.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/lab2.dir/user_funs.cpp.o -MF CMakeFiles/lab2.dir/user_funs.cpp.o.d -o CMakeFiles/lab2.dir/user_funs.cpp.o -c /workspaces/lab2v2/user_funs.cpp
+CMakeFiles/lab2.dir/src/user_funs.cpp.o: CMakeFiles/lab2.dir/flags.make
+CMakeFiles/lab2.dir/src/user_funs.cpp.o: /mnt/e/Moje\ Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/user_funs.cpp
+CMakeFiles/lab2.dir/src/user_funs.cpp.o: CMakeFiles/lab2.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/lab2.dir/src/user_funs.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/lab2.dir/src/user_funs.cpp.o -MF CMakeFiles/lab2.dir/src/user_funs.cpp.o.d -o CMakeFiles/lab2.dir/src/user_funs.cpp.o -c "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/user_funs.cpp"
 
-CMakeFiles/lab2.dir/user_funs.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lab2.dir/user_funs.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /workspaces/lab2v2/user_funs.cpp > CMakeFiles/lab2.dir/user_funs.cpp.i
+CMakeFiles/lab2.dir/src/user_funs.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/lab2.dir/src/user_funs.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/user_funs.cpp" > CMakeFiles/lab2.dir/src/user_funs.cpp.i
 
-CMakeFiles/lab2.dir/user_funs.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lab2.dir/user_funs.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /workspaces/lab2v2/user_funs.cpp -o CMakeFiles/lab2.dir/user_funs.cpp.s
+CMakeFiles/lab2.dir/src/user_funs.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/lab2.dir/src/user_funs.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/user_funs.cpp" -o CMakeFiles/lab2.dir/src/user_funs.cpp.s
 
 # Object files for target lab2
 lab2_OBJECTS = \
-"CMakeFiles/lab2.dir/main.cpp.o" \
-"CMakeFiles/lab2.dir/matrix.cpp.o" \
-"CMakeFiles/lab2.dir/ode_solver.cpp.o" \
-"CMakeFiles/lab2.dir/solution.cpp.o" \
-"CMakeFiles/lab2.dir/opt_alg.cpp.o" \
-"CMakeFiles/lab2.dir/user_funs.cpp.o"
+"CMakeFiles/lab2.dir/src/main.cpp.o" \
+"CMakeFiles/lab2.dir/src/matrix.cpp.o" \
+"CMakeFiles/lab2.dir/src/ode_solver.cpp.o" \
+"CMakeFiles/lab2.dir/src/solution.cpp.o" \
+"CMakeFiles/lab2.dir/src/opt_alg.cpp.o" \
+"CMakeFiles/lab2.dir/src/user_funs.cpp.o"
 
 # External object files for target lab2
 lab2_EXTERNAL_OBJECTS =
 
-lab2: CMakeFiles/lab2.dir/main.cpp.o
-lab2: CMakeFiles/lab2.dir/matrix.cpp.o
-lab2: CMakeFiles/lab2.dir/ode_solver.cpp.o
-lab2: CMakeFiles/lab2.dir/solution.cpp.o
-lab2: CMakeFiles/lab2.dir/opt_alg.cpp.o
-lab2: CMakeFiles/lab2.dir/user_funs.cpp.o
+lab2: CMakeFiles/lab2.dir/src/main.cpp.o
+lab2: CMakeFiles/lab2.dir/src/matrix.cpp.o
+lab2: CMakeFiles/lab2.dir/src/ode_solver.cpp.o
+lab2: CMakeFiles/lab2.dir/src/solution.cpp.o
+lab2: CMakeFiles/lab2.dir/src/opt_alg.cpp.o
+lab2: CMakeFiles/lab2.dir/src/user_funs.cpp.o
 lab2: CMakeFiles/lab2.dir/build.make
 lab2: CMakeFiles/lab2.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/workspaces/lab2v2/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX executable lab2"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir="/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX executable lab2"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/lab2.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -185,6 +185,6 @@ CMakeFiles/lab2.dir/clean:
 .PHONY : CMakeFiles/lab2.dir/clean
 
 CMakeFiles/lab2.dir/depend:
-	cd /workspaces/lab2v2/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /workspaces/lab2v2 /workspaces/lab2v2 /workspaces/lab2v2/build /workspaces/lab2v2/build /workspaces/lab2v2/build/CMakeFiles/lab2.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/build" && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github" "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github" "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/build" "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/build" "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/build/CMakeFiles/lab2.dir/DependInfo.cmake" "--color=$(COLOR)"
 .PHONY : CMakeFiles/lab2.dir/depend
 

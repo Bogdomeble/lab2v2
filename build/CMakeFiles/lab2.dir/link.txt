@@ -1,1 +1,1 @@
-/usr/bin/c++ CMakeFiles/lab2.dir/main.cpp.o CMakeFiles/lab2.dir/matrix.cpp.o CMakeFiles/lab2.dir/ode_solver.cpp.o CMakeFiles/lab2.dir/solution.cpp.o CMakeFiles/lab2.dir/opt_alg.cpp.o CMakeFiles/lab2.dir/user_funs.cpp.o -o lab2 
+/usr/bin/c++ CMakeFiles/lab2.dir/src/main.cpp.o CMakeFiles/lab2.dir/src/matrix.cpp.o CMakeFiles/lab2.dir/src/ode_solver.cpp.o CMakeFiles/lab2.dir/src/solution.cpp.o CMakeFiles/lab2.dir/src/opt_alg.cpp.o CMakeFiles/lab2.dir/src/user_funs.cpp.o -o lab2 

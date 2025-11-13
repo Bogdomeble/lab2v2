@@ -57,10 +57,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /workspaces/lab2v2
+CMAKE_SOURCE_DIR = "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /workspaces/lab2v2/build
+CMAKE_BINARY_DIR = "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/build"
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /workspaces/lab2v2/build/CMakeFiles /workspaces/lab2v2/build//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/build/CMakeFiles" "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/build//CMakeFiles/progress.marks"
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /workspaces/lab2v2/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/build/CMakeFiles" 0
 .PHONY : all
 
 # The main clean target
@@ -129,149 +129,149 @@ lab2/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/build
 .PHONY : lab2/fast
 
-main.o: main.cpp.o
-.PHONY : main.o
+src/main.o: src/main.cpp.o
+.PHONY : src/main.o
 
 # target to build an object file
-main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/main.cpp.o
-.PHONY : main.cpp.o
+src/main.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/src/main.cpp.o
+.PHONY : src/main.cpp.o
 
-main.i: main.cpp.i
-.PHONY : main.i
+src/main.i: src/main.cpp.i
+.PHONY : src/main.i
 
 # target to preprocess a source file
-main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/main.cpp.i
-.PHONY : main.cpp.i
+src/main.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/src/main.cpp.i
+.PHONY : src/main.cpp.i
 
-main.s: main.cpp.s
-.PHONY : main.s
+src/main.s: src/main.cpp.s
+.PHONY : src/main.s
 
 # target to generate assembly for a file
-main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/main.cpp.s
-.PHONY : main.cpp.s
+src/main.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/src/main.cpp.s
+.PHONY : src/main.cpp.s
 
-matrix.o: matrix.cpp.o
-.PHONY : matrix.o
+src/matrix.o: src/matrix.cpp.o
+.PHONY : src/matrix.o
 
 # target to build an object file
-matrix.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/matrix.cpp.o
-.PHONY : matrix.cpp.o
+src/matrix.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/src/matrix.cpp.o
+.PHONY : src/matrix.cpp.o
 
-matrix.i: matrix.cpp.i
-.PHONY : matrix.i
+src/matrix.i: src/matrix.cpp.i
+.PHONY : src/matrix.i
 
 # target to preprocess a source file
-matrix.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/matrix.cpp.i
-.PHONY : matrix.cpp.i
+src/matrix.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/src/matrix.cpp.i
+.PHONY : src/matrix.cpp.i
 
-matrix.s: matrix.cpp.s
-.PHONY : matrix.s
+src/matrix.s: src/matrix.cpp.s
+.PHONY : src/matrix.s
 
 # target to generate assembly for a file
-matrix.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/matrix.cpp.s
-.PHONY : matrix.cpp.s
+src/matrix.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/src/matrix.cpp.s
+.PHONY : src/matrix.cpp.s
 
-ode_solver.o: ode_solver.cpp.o
-.PHONY : ode_solver.o
+src/ode_solver.o: src/ode_solver.cpp.o
+.PHONY : src/ode_solver.o
 
 # target to build an object file
-ode_solver.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/ode_solver.cpp.o
-.PHONY : ode_solver.cpp.o
+src/ode_solver.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/src/ode_solver.cpp.o
+.PHONY : src/ode_solver.cpp.o
 
-ode_solver.i: ode_solver.cpp.i
-.PHONY : ode_solver.i
+src/ode_solver.i: src/ode_solver.cpp.i
+.PHONY : src/ode_solver.i
 
 # target to preprocess a source file
-ode_solver.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/ode_solver.cpp.i
-.PHONY : ode_solver.cpp.i
+src/ode_solver.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/src/ode_solver.cpp.i
+.PHONY : src/ode_solver.cpp.i
 
-ode_solver.s: ode_solver.cpp.s
-.PHONY : ode_solver.s
+src/ode_solver.s: src/ode_solver.cpp.s
+.PHONY : src/ode_solver.s
 
 # target to generate assembly for a file
-ode_solver.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/ode_solver.cpp.s
-.PHONY : ode_solver.cpp.s
+src/ode_solver.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/src/ode_solver.cpp.s
+.PHONY : src/ode_solver.cpp.s
 
-opt_alg.o: opt_alg.cpp.o
-.PHONY : opt_alg.o
+src/opt_alg.o: src/opt_alg.cpp.o
+.PHONY : src/opt_alg.o
 
 # target to build an object file
-opt_alg.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/opt_alg.cpp.o
-.PHONY : opt_alg.cpp.o
+src/opt_alg.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/src/opt_alg.cpp.o
+.PHONY : src/opt_alg.cpp.o
 
-opt_alg.i: opt_alg.cpp.i
-.PHONY : opt_alg.i
+src/opt_alg.i: src/opt_alg.cpp.i
+.PHONY : src/opt_alg.i
 
 # target to preprocess a source file
-opt_alg.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/opt_alg.cpp.i
-.PHONY : opt_alg.cpp.i
+src/opt_alg.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/src/opt_alg.cpp.i
+.PHONY : src/opt_alg.cpp.i
 
-opt_alg.s: opt_alg.cpp.s
-.PHONY : opt_alg.s
+src/opt_alg.s: src/opt_alg.cpp.s
+.PHONY : src/opt_alg.s
 
 # target to generate assembly for a file
-opt_alg.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/opt_alg.cpp.s
-.PHONY : opt_alg.cpp.s
+src/opt_alg.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/src/opt_alg.cpp.s
+.PHONY : src/opt_alg.cpp.s
 
-solution.o: solution.cpp.o
-.PHONY : solution.o
+src/solution.o: src/solution.cpp.o
+.PHONY : src/solution.o
 
 # target to build an object file
-solution.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/solution.cpp.o
-.PHONY : solution.cpp.o
+src/solution.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/src/solution.cpp.o
+.PHONY : src/solution.cpp.o
 
-solution.i: solution.cpp.i
-.PHONY : solution.i
+src/solution.i: src/solution.cpp.i
+.PHONY : src/solution.i
 
 # target to preprocess a source file
-solution.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/solution.cpp.i
-.PHONY : solution.cpp.i
+src/solution.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/src/solution.cpp.i
+.PHONY : src/solution.cpp.i
 
-solution.s: solution.cpp.s
-.PHONY : solution.s
+src/solution.s: src/solution.cpp.s
+.PHONY : src/solution.s
 
 # target to generate assembly for a file
-solution.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/solution.cpp.s
-.PHONY : solution.cpp.s
+src/solution.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/src/solution.cpp.s
+.PHONY : src/solution.cpp.s
 
-user_funs.o: user_funs.cpp.o
-.PHONY : user_funs.o
+src/user_funs.o: src/user_funs.cpp.o
+.PHONY : src/user_funs.o
 
 # target to build an object file
-user_funs.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/user_funs.cpp.o
-.PHONY : user_funs.cpp.o
+src/user_funs.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/src/user_funs.cpp.o
+.PHONY : src/user_funs.cpp.o
 
-user_funs.i: user_funs.cpp.i
-.PHONY : user_funs.i
+src/user_funs.i: src/user_funs.cpp.i
+.PHONY : src/user_funs.i
 
 # target to preprocess a source file
-user_funs.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/user_funs.cpp.i
-.PHONY : user_funs.cpp.i
+src/user_funs.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/src/user_funs.cpp.i
+.PHONY : src/user_funs.cpp.i
 
-user_funs.s: user_funs.cpp.s
-.PHONY : user_funs.s
+src/user_funs.s: src/user_funs.cpp.s
+.PHONY : src/user_funs.s
 
 # target to generate assembly for a file
-user_funs.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/user_funs.cpp.s
-.PHONY : user_funs.cpp.s
+src/user_funs.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/lab2.dir/build.make CMakeFiles/lab2.dir/src/user_funs.cpp.s
+.PHONY : src/user_funs.cpp.s
 
 # Help Target
 help:
@@ -282,24 +282,24 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... lab2"
-	@echo "... main.o"
-	@echo "... main.i"
-	@echo "... main.s"
-	@echo "... matrix.o"
-	@echo "... matrix.i"
-	@echo "... matrix.s"
-	@echo "... ode_solver.o"
-	@echo "... ode_solver.i"
-	@echo "... ode_solver.s"
-	@echo "... opt_alg.o"
-	@echo "... opt_alg.i"
-	@echo "... opt_alg.s"
-	@echo "... solution.o"
-	@echo "... solution.i"
-	@echo "... solution.s"
-	@echo "... user_funs.o"
-	@echo "... user_funs.i"
-	@echo "... user_funs.s"
+	@echo "... src/main.o"
+	@echo "... src/main.i"
+	@echo "... src/main.s"
+	@echo "... src/matrix.o"
+	@echo "... src/matrix.i"
+	@echo "... src/matrix.s"
+	@echo "... src/ode_solver.o"
+	@echo "... src/ode_solver.i"
+	@echo "... src/ode_solver.s"
+	@echo "... src/opt_alg.o"
+	@echo "... src/opt_alg.i"
+	@echo "... src/opt_alg.s"
+	@echo "... src/solution.o"
+	@echo "... src/solution.i"
+	@echo "... src/solution.s"
+	@echo "... src/user_funs.o"
+	@echo "... src/user_funs.i"
+	@echo "... src/user_funs.s"
 .PHONY : help
 
 

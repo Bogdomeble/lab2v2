@@ -8,12 +8,12 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/workspaces/lab2v2/main.cpp" "CMakeFiles/lab2.dir/main.cpp.o" "gcc" "CMakeFiles/lab2.dir/main.cpp.o.d"
-  "/workspaces/lab2v2/matrix.cpp" "CMakeFiles/lab2.dir/matrix.cpp.o" "gcc" "CMakeFiles/lab2.dir/matrix.cpp.o.d"
-  "/workspaces/lab2v2/ode_solver.cpp" "CMakeFiles/lab2.dir/ode_solver.cpp.o" "gcc" "CMakeFiles/lab2.dir/ode_solver.cpp.o.d"
-  "/workspaces/lab2v2/opt_alg.cpp" "CMakeFiles/lab2.dir/opt_alg.cpp.o" "gcc" "CMakeFiles/lab2.dir/opt_alg.cpp.o.d"
-  "/workspaces/lab2v2/solution.cpp" "CMakeFiles/lab2.dir/solution.cpp.o" "gcc" "CMakeFiles/lab2.dir/solution.cpp.o.d"
-  "/workspaces/lab2v2/user_funs.cpp" "CMakeFiles/lab2.dir/user_funs.cpp.o" "gcc" "CMakeFiles/lab2.dir/user_funs.cpp.o.d"
+  "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/main.cpp" "CMakeFiles/lab2.dir/src/main.cpp.o" "gcc" "CMakeFiles/lab2.dir/src/main.cpp.o.d"
+  "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/matrix.cpp" "CMakeFiles/lab2.dir/src/matrix.cpp.o" "gcc" "CMakeFiles/lab2.dir/src/matrix.cpp.o.d"
+  "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/ode_solver.cpp" "CMakeFiles/lab2.dir/src/ode_solver.cpp.o" "gcc" "CMakeFiles/lab2.dir/src/ode_solver.cpp.o.d"
+  "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/opt_alg.cpp" "CMakeFiles/lab2.dir/src/opt_alg.cpp.o" "gcc" "CMakeFiles/lab2.dir/src/opt_alg.cpp.o.d"
+  "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/solution.cpp" "CMakeFiles/lab2.dir/src/solution.cpp.o" "gcc" "CMakeFiles/lab2.dir/src/solution.cpp.o.d"
+  "/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/src/user_funs.cpp" "CMakeFiles/lab2.dir/src/user_funs.cpp.o" "gcc" "CMakeFiles/lab2.dir/src/user_funs.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.
