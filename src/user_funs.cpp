@@ -1,4 +1,4 @@
-#include "user_funs.h"
+#include "../include/user_funs.h"
 #include <cmath>
 #include <vector>
 #define _USE_MATH_DEFINES
