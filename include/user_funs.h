@@ -1,3 +1,4 @@
+// user_funs.h
 #pragma once
 
 #include"ode_solver.h"
@@ -16,5 +17,9 @@ matrix ff1T(matrix x, matrix ud1, matrix ud2);
 matrix ff1R(matrix x, matrix ud1, matrix ud2);
 matrix dff1R(double t, matrix Y, matrix ud1, matrix ud2);
 matrix ff2T(matrix x, matrix ud1 = NAN, matrix ud2 = NAN);
+
+// --- DODANO FUNKCJĘ DLA ZADANIA 5B ---
 matrix ff2R(matrix x, matrix ud1 = NAN, matrix ud2 = NAN);
+// ------------------------------------
+
 matrix df2R(double t, matrix Y, matrix ud1 = NAN, matrix ud2 = NAN);

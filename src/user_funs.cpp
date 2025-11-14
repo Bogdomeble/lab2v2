@@ -140,6 +140,63 @@ matrix dff1R(double t, matrix Y, matrix ud1, matrix ud2) {
 }
 
 
+matrix ff2R(matrix x, matrix ud1, matrix ud2) {
+    // Zmienne optymalizacji to współczynniki wzmocnienia regulatora
+    double k1 = x(0);
+    double k2 = x(1);
+
+    // Stałe modelu i symulacji
+    double b = 0.25;
+    double mr = 1.0;
+    double mc = 5.0;
+    double l = 2.0;
+    double I = (1.0/3.0) * mr * pow(l, 2) + mc * pow(l, 2);
+    double aref = M_PI;
+    double wref = 0;
+
+    double t0 = 0.0;
+    double tend = 100.0;
+    double dt = 0.1;
+
+    // Warunki początkowe dla równania różniczkowego: [alpha(0), omega(0)]
+    matrix Y0(2, 1);
+    Y0(0) = 0.0; // Początkowy kąt
+    Y0(1) = 0.0; // Początkowa prędkość kątowa
+
+    // Przekazanie współczynników k1 i k2 do funkcji różniczkowej przez ud2
+    matrix ode_params(2, 1);
+    ode_params(0) = k1;
+    ode_params(1) = k2;
+
+    // Rozwiązanie równania różniczkowego
+    matrix* Y = solve_ode(df2R, t0, dt, tend, Y0, NAN, ode_params);
+
+    // Obliczenie funkcjonału jakości Q(k1, k2) metodą prostokątów
+    double Q = 0.0;
+    int num_steps = get_len(Y[0]);
+
+    for (int i = 0; i < num_steps; ++i) {
+        double current_alpha = Y[1](i, 0);
+        double current_omega = Y[1](i, 1);
+
+        // Obliczenie momentu siły M(t) w danym kroku
+        double M = k1 * (aref - current_alpha) + k2 * (wref - current_omega);
+
+        // Obliczenie wartości funkcji podcałkowej
+        double integrand = 10 * pow(aref - current_alpha, 2) + pow(wref - current_omega, 2) + pow(M, 2);
+
+        // Dodanie do sumy całkowej
+        Q += integrand * dt;
+    }
+
+    // Zwolnienie pamięci zaalokowanej przez solve_ode
+    delete[] Y;
+
+    // Funkcja celu zwraca obliczoną wartość Q
+    return matrix(Q);
+}
+
+
 matrix ff2T(matrix x, matrix ud1, matrix ud2) {
     double x1 = x(0);
 
