@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I"/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/include"
 
-CXX_FLAGS = -Wall -Werror -O3
+CXX_FLAGS = -Wall -O3
 

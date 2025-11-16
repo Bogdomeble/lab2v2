@@ -316,6 +316,13 @@ void lab2() {
     // --- Zadanie 5b: Problem rzeczywisty ---
     cout << "--- Laboratorium 2: Optymalizacja dla problemu rzeczywistego ---" << endl;
 
+    ofstream real_problem_file("lab2_real_problem_results.csv");
+    if (!real_problem_file.is_open()) {
+        cerr << "ERROR: Nie mozna otworzyc pliku lab2_real_problem_results.csv do zapisu!" << endl;
+    } else {
+        real_problem_file << "Dlugosc_kroku,HJ_k1,HJ_k2,HJ_Q,HJ_f_calls,Rosen_k1,Rosen_k2,Rosen_Q,Rosen_f_calls\n";
+    }
+
     // Inicjalizacja generatora liczb losowych
     srand(time(nullptr));
 
@@ -332,89 +339,110 @@ void lab2() {
 
     cout << "Losowy punkt startowy (k1, k2): (" << x0(0) << ", " << x0(1) << ")" << endl << endl;
 
-    // --- Metoda Hooke'a-Jeevesa ---
-    cout << "--- Uruchomienie metody Hooke'a-Jeevesa ---" << endl;
-    double s_hj = 0.5;      // Długość kroku startowego
-    solution sol_hj;
-    try {
-        solution::clear_calls();
-        sol_hj = HJ(&ff2R, x0, s_hj, alpha_hj, epsilon, Nmax);
-        cout << "Optymalizacja metoda Hooke'a-Jeevesa zakonczona." << endl;
-        cout << sol_hj << endl;
-    } catch (const string& ex) {
-        cerr << "Blad w metodzie Hooke'a-Jeevesa: " << ex << endl;
-    }
+    vector<double> step_sizes = { 5.0, 2.0, 1.0, 0.5, 0.1 };
 
-    // --- Metoda Rosenbrocka ---
-    cout << "--- Uruchomienie metody Rosenbrocka ---" << endl;
-    solution sol_rosen;
-    try {
-        solution::clear_calls();
-        sol_rosen = Rosen(&ff2R, x0, s0_rosen, alpha_rosen, beta_rosen, epsilon, Nmax);
-        cout << "Optymalizacja metoda Rosenbrocka zakonczona." << endl;
-        cout << sol_rosen << endl;
-    } catch (const string& ex) {
-        cerr << "Blad w metodzie Rosenbrocka: " << ex << endl;
-    }
+    for (double current_step : step_sizes) {
+        cout << "--- Testowanie dla kroku startowego: " << current_step << " ---" << endl;
 
-    // --- Symulacja i zapis do pliku dla optymalnych parametrów z metody Hooke'a-Jeevesa ---
-    cout << "--- Przeprowadzanie symulacji dla optymalnych parametrow z Hooke-Jeeves ---" << endl;
-    if (sol_hj.flag > 0) { // Sprawdzenie, czy metoda HJ znalazła rozwiązanie
-        double k1_opt = sol_hj.x(0);
-        double k2_opt = sol_hj.x(1);
-        cout << "Parametry optymalne: k1 = " << k1_opt << ", k2 = " << k2_opt << endl;
+        solution sol_hj, sol_rosen;
+        int hj_calls = 0, rosen_calls = 0;
 
-        matrix Y0(2, 1); Y0(0) = 0.0; Y0(1) = 0.0;
-        matrix ode_params(2, 1); ode_params(0) = k1_opt; ode_params(1) = k2_opt;
-
-        matrix* Y = solve_ode(df2R, 0.0, 0.1, 100.0, Y0, NAN, ode_params);
-
-        ofstream sim_file("lab2_real_simulation_HJ.csv");
-        if (sim_file.is_open()) {
-            sim_file << "t,alpha,omega\n";
-            int num_steps = get_len(Y[0]);
-            for (int i = 0; i < num_steps; ++i) {
-                sim_file << Y[0](i) << "," << Y[1](i, 0) << "," << Y[1](i, 1) << "\n";
-            }
-            sim_file.close();
-            cout << "Wyniki symulacji zostaly zapisane do pliku lab2_real_simulation_HJ.csv" << endl << endl;
-        } else {
-            cerr << "BLAD: Nie mozna otworzyc pliku lab2_real_simulation_HJ.csv do zapisu!" << endl;
+        // --- Metoda Hooke'a-Jeevesa ---
+        try {
+            solution::clear_calls();
+            sol_hj = HJ(&ff2R, x0, current_step, alpha_hj, epsilon, Nmax);
+            hj_calls = solution::f_calls;
+            cout << "Optymalizacja metoda Hooke'a-Jeevesa zakonczona." << endl;
+            cout << sol_hj << endl;
+        } catch (const string& ex) {
+            cerr << "Blad w metodzie Hooke'a-Jeevesa: " << ex << endl;
         }
-        delete[] Y;
-    } else {
-        cout << "Pominieto symulacje, poniewaz metoda Hooke-Jeevesa nie zwrocila poprawnego rozwiazania." << endl << endl;
-    }
 
-    // --- Symulacja i zapis do pliku dla optymalnych parametrów z metody Rosenbrocka ---
-    cout << "--- Przeprowadzanie symulacji dla optymalnych parametrow z Rosenbrocka ---" << endl;
-    if (sol_rosen.flag > 0) { // Sprawdzenie, czy metoda Rosenbrocka znalazła rozwiązanie
-        double k1_opt = sol_rosen.x(0);
-        double k2_opt = sol_rosen.x(1);
-        cout << "Parametry optymalne: k1 = " << k1_opt << ", k2 = " << k2_opt << endl;
-
-        matrix Y0(2, 1); Y0(0) = 0.0; Y0(1) = 0.0;
-        matrix ode_params(2, 1); ode_params(0) = k1_opt; ode_params(1) = k2_opt;
-
-        matrix* Y = solve_ode(df2R, 0.0, 0.1, 100.0, Y0, NAN, ode_params);
-
-        ofstream sim_file("lab2_real_simulation_Rosenbrock.csv");
-        if (sim_file.is_open()) {
-            sim_file << "t,alpha,omega\n";
-            int num_steps = get_len(Y[0]);
-            for (int i = 0; i < num_steps; ++i) {
-                sim_file << Y[0](i) << "," << Y[1](i, 0) << "," << Y[1](i, 1) << "\n";
-            }
-            sim_file.close();
-            cout << "Wyniki symulacji zostaly zapisane do pliku lab2_real_simulation_Rosenbrock.csv" << endl << endl;
-        } else {
-            cerr << "BLAD: Nie mozna otworzyc pliku lab2_real_simulation_Rosenbrock.csv do zapisu!" << endl;
+        // --- Metoda Rosenbrocka ---
+        matrix s0_rosen_loop(2, 1);
+        s0_rosen_loop(0) = current_step;
+        s0_rosen_loop(1) = current_step;
+        try {
+            solution::clear_calls();
+            sol_rosen = Rosen(&ff2R, x0, s0_rosen_loop, alpha_rosen, beta_rosen, epsilon, Nmax);
+            rosen_calls = solution::f_calls;
+            cout << "Optymalizacja metoda Rosenbrocka zakonczona." << endl;
+            cout << sol_rosen << endl;
+        } catch (const string& ex) {
+            cerr << "Blad w metodzie Rosenbrocka: " << ex << endl;
         }
-        delete[] Y;
-    } else {
-        cout << "Pominieto symulacje, poniewaz metoda Rosenbrocka nie zwrocila poprawnego rozwiazania." << endl << endl;
-    }
 
+        if (real_problem_file.is_open()) {
+            real_problem_file << current_step << ","
+                              << sol_hj.x(0) << "," << sol_hj.x(1) << "," << sol_hj.y(0) << "," << hj_calls << ","
+                              << sol_rosen.x(0) << "," << sol_rosen.x(1) << "," << sol_rosen.y(0) << "," << rosen_calls << "\n";
+        }
+
+        // This part is for generating data for the second table
+        if (current_step == 0.5) { // Run simulation only for one representative step size
+            // --- Symulacja i zapis do pliku dla optymalnych parametrów z metody Hooke'a-Jeevesa ---
+            cout << "--- Przeprowadzanie symulacji dla optymalnych parametrow z Hooke-Jeeves (krok=" << current_step << ") ---" << endl;
+            if (sol_hj.flag > 0) { // Sprawdzenie, czy metoda HJ znalazła rozwiązanie
+                double k1_opt = sol_hj.x(0);
+                double k2_opt = sol_hj.x(1);
+                cout << "Parametry optymalne: k1 = " << k1_opt << ", k2 = " << k2_opt << endl;
+
+                matrix Y0(2, 1); Y0(0) = 0.0; Y0(1) = 0.0;
+                matrix ode_params(2, 1); ode_params(0) = k1_opt; ode_params(1) = k2_opt;
+
+                matrix* Y = solve_ode(df2R, 0.0, 0.1, 100.0, Y0, NAN, ode_params);
+
+                ofstream sim_file("lab2_real_simulation_HJ.csv");
+                if (sim_file.is_open()) {
+                    sim_file << "t,alpha,omega\n";
+                    int num_steps = get_len(Y[0]);
+                    for (int i = 0; i < num_steps; ++i) {
+                        sim_file << Y[0](i) << "," << Y[1](i, 0) << "," << Y[1](i, 1) << "\n";
+                    }
+                    sim_file.close();
+                    cout << "Wyniki symulacji zostaly zapisane do pliku lab2_real_simulation_HJ.csv" << endl << endl;
+                } else {
+                    cerr << "BLAD: Nie mozna otworzyc pliku lab2_real_simulation_HJ.csv do zapisu!" << endl;
+                }
+                delete[] Y;
+            } else {
+                cout << "Pominieto symulacje, poniewaz metoda Hooke-Jeevesa nie zwrocila poprawnego rozwiazania." << endl << endl;
+            }
+
+            // --- Symulacja i zapis do pliku dla optymalnych parametrów z metody Rosenbrocka ---
+            cout << "--- Przeprowadzanie symulacji dla optymalnych parametrow z Rosenbrocka (krok=" << current_step << ") ---" << endl;
+            if (sol_rosen.flag > 0) { // Sprawdzenie, czy metoda Rosenbrocka znalazła rozwiązanie
+                double k1_opt = sol_rosen.x(0);
+                double k2_opt = sol_rosen.x(1);
+                cout << "Parametry optymalne: k1 = " << k1_opt << ", k2 = " << k2_opt << endl;
+
+                matrix Y0(2, 1); Y0(0) = 0.0; Y0(1) = 0.0;
+                matrix ode_params(2, 1); ode_params(0) = k1_opt; ode_params(1) = k2_opt;
+
+                matrix* Y = solve_ode(df2R, 0.0, 0.1, 100.0, Y0, NAN, ode_params);
+
+                ofstream sim_file("lab2_real_simulation_Rosenbrock.csv");
+                if (sim_file.is_open()) {
+                    sim_file << "t,alpha,omega\n";
+                    int num_steps = get_len(Y[0]);
+                    for (int i = 0; i < num_steps; ++i) {
+                        sim_file << Y[0](i) << "," << Y[1](i, 0) << "," << Y[1](i, 1) << "\n";
+                    }
+                    sim_file.close();
+                    cout << "Wyniki symulacji zostaly zapisane do pliku lab2_real_simulation_Rosenbrock.csv" << endl << endl;
+                } else {
+                    cerr << "BLAD: Nie mozna otworzyc pliku lab2_real_simulation_Rosenbrock.csv do zapisu!" << endl;
+                }
+                delete[] Y;
+            } else {
+                cout << "Pominieto symulacje, poniewaz metoda Rosenbrocka nie zwrocila poprawnego rozwiazania." << endl << endl;
+            }
+        }
+    }
+    if (real_problem_file.is_open()) {
+        real_problem_file.close();
+        cout << "\nZakonczono testy dla problemu rzeczywistego. Wyniki zostaly zapisane do pliku lab2_real_problem_results.csv" << endl;
+    }
 }
 
 void lab3() {

@@ -11,8 +11,8 @@ build/CMakeFiles/lab2.dir/solution.cpp.o.d
 build/CMakeFiles/lab2.dir/user_funs.cpp.o.d
 lab_1_real_lagrange.csv
 lab1_results.csv
-.vscode/launch.json
 build/lab2
+build/launch.json
 build/CMakeFiles/lab2.dir/compiler_depend.make
 build/CMakeFiles/lab2.dir/main.cpp.o
 build/CMakeFiles/lab2.dir/main.cpp.o.d

@@ -1,5 +1,6 @@
 //opt_alg.cpp
 #include "../include/opt_alg.h"
+#include <fstream>
 
 solution MC(matrix (*ff)(matrix, matrix, matrix), int N, matrix lb, matrix ub, double epsilon, int Nmax, matrix ud1,
             matrix ud2) {
@@ -221,8 +222,18 @@ solution lag(matrix (*ff)(matrix, matrix, matrix), double a, double b, double ep
 solution HJ(matrix (*ff)(matrix, matrix, matrix), matrix x0, double s, double alpha, double epsilon, int Nmax,
             matrix ud1, matrix ud2) {
     try {
+		std::ofstream log_file("hj_iterations.csv");
+		if (log_file.is_open()) {
+			log_file << "Iteration,x1*,x2*\\n";
+		}
+		int iter = 0;
+
         solution XB(x0), X;
         XB.fit_fun(ff, ud1, ud2);
+
+		if (log_file.is_open()) {
+			log_file << iter << "," << XB.x(0) << "," << XB.x(1) << "\\n";
+		}
 
         do {
             X = HJ_trial(ff, XB, s, ud1, ud2);
@@ -242,16 +253,24 @@ solution HJ(matrix (*ff)(matrix, matrix, matrix), matrix x0, double s, double al
             } else {
                 s *= alpha;
             }
+			iter++;
+			if (log_file.is_open()) {
+				log_file << iter << "," << XB.x(0) << "," << XB.x(1) << "\\n";
+			}
             if(solution::f_calls > Nmax) {
                 X.flag = 0; // Timeout
                 break;
             }
         } while (s > epsilon);
 
+		if (log_file.is_open()) {
+			log_file.close();
+		}
+
         X.flag = 1; // Success
         return X;
     } catch (string ex_info) {
-        throw ("solution HJ(...):\n" + ex_info);
+        throw ("solution HJ(...):\\n" + ex_info);
     }
 }
 
@@ -284,9 +303,19 @@ solution HJ_trial(matrix (*ff)(matrix, matrix, matrix), solution XB, double s, m
 solution Rosen(matrix (*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double alpha, double beta, double epsilon,
                int Nmax, matrix ud1, matrix ud2) {
     try {
+		std::ofstream log_file("rosen_iterations.csv");
+		if (log_file.is_open()) {
+			log_file << "Iteration,x1*,x2*\\n";
+		}
+		int iter = 0;
+
         int n = get_len(x0);
         solution X(x0);
         X.fit_fun(ff, ud1, ud2);
+
+		if (log_file.is_open()) {
+			log_file << iter << "," << X.x(0) << "," << X.x(1) << "\\n";
+		}
 
         matrix s = s0;
         matrix D = ident_mat(n);
@@ -342,6 +371,11 @@ solution Rosen(matrix (*ff)(matrix, matrix, matrix), matrix x0, matrix s0, doubl
                 p = matrix(n,1,0.0);
             }
 
+			iter++;
+			if (log_file.is_open()) {
+				log_file << iter << "," << X.x(0) << "," << X.x(1) << "\\n";
+			}
+
             if(solution::f_calls > Nmax) {
                 X.flag = 0;
                 break;
@@ -349,10 +383,14 @@ solution Rosen(matrix (*ff)(matrix, matrix, matrix), matrix x0, matrix s0, doubl
 
         } while (norm(s) > epsilon);
 
+		if (log_file.is_open()) {
+			log_file.close();
+		}
+
         X.flag = 1;
         return X;
     } catch (string ex_info) {
-        throw ("solution Rosen(...):\n" + ex_info);
+        throw ("solution Rosen(...):\\n" + ex_info);
     }
 }
 
