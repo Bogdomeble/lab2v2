@@ -368,17 +368,6 @@ solution pen(matrix (*ff)(matrix, matrix, matrix), matrix x0, double c, double d
     }
 }
 
-solution sym_NM(matrix (*ff)(matrix, matrix, matrix), matrix x0, double s, double alpha, double beta, double gamma,
-                double delta, double epsilon, int Nmax, matrix ud1, matrix ud2) {
-    try {
-        solution Xopt;
-
-
-        return Xopt;
-    } catch (string ex_info) {
-        throw ("solution sym_NM(...):\n" + ex_info);
-    }
-}
 
 solution SD(matrix (*ff)(matrix, matrix, matrix), matrix (*gf)(matrix, matrix, matrix), matrix x0, double h0,
             double epsilon, int Nmax, matrix ud1, matrix ud2) {
@@ -449,5 +438,118 @@ solution EA(matrix (*ff)(matrix, matrix, matrix), int N, matrix lb, matrix ub, i
         return Xopt;
     } catch (string ex_info) {
         throw ("solution EA(...):\n" + ex_info);
+    }
+}
+
+solution sym_NM(matrix (*ff)(matrix, matrix, matrix), matrix x0, double s, double alpha, double beta, double gamma,
+                double delta, double epsilon, int Nmax, matrix ud1, matrix ud2) {
+    try {
+        int n = get_len(x0);
+        solution S[n + 1];
+
+        // 1. Inicjalizacja sympleksu
+        S[0].x = x0;
+        for (int i = 1; i <= n; ++i) {
+            matrix e(n, 1);
+            e(i - 1) = 1.0;
+            S[i].x = x0 + s * e;
+        }
+
+        // Pętla główna
+        do {
+            // Obliczenie wartości funkcji celu dla wierzchołków
+            for (int i = 0; i <= n; ++i) {
+                S[i].fit_fun(ff, ud1, ud2);
+            }
+
+            // 2. Sortowanie wierzchołków
+            int i_min = 0, i_max = 0;
+            for (int i = 1; i <= n; ++i) {
+                if (S[i].y < S[i_min].y) i_min = i;
+                if (S[i].y > S[i_max].y) i_max = i;
+            }
+
+            // 3. Obliczenie środka ciężkości (bez najgorszego punktu)
+            matrix p(n, 1);
+            for (int i = 0; i <= n; ++i) {
+                if (i != i_max) {
+                    p = p + S[i].x;
+                }
+            }
+            p = p / n;
+
+            // 4. Odbicie (refleksja)
+            solution p_odb = S[i_max];
+            p_odb.x = p + alpha * (p - S[i_max].x);
+            p_odb.fit_fun(ff, ud1, ud2);
+
+            if (p_odb.y < S[i_min].y) {
+                // 5. Ekpansja
+                solution p_e = S[i_max];
+                p_e.x = p + gamma * (p_odb.x - p);
+                p_e.fit_fun(ff, ud1, ud2);
+                if (p_e.y < p_odb.y) {
+                    S[i_max] = p_e;
+                } else {
+                    S[i_max] = p_odb;
+                }
+            } else if (p_odb.y >= S[i_min].y) {
+                bool better_than_second_worst = true;
+                for (int i = 0; i <= n; i++) {
+                    if (i != i_max && p_odb.y > S[i].y) {
+                        better_than_second_worst = false;
+                        break;
+                    }
+                }
+
+                if (better_than_second_worst) {
+                    S[i_max] = p_odb;
+                } else {
+                    // 6. Zawężenie
+                    if (p_odb.y < S[i_max].y) {
+                        S[i_max] = p_odb;
+                    }
+                    solution p_z = S[i_max];
+                    p_z.x = p + beta * (S[i_max].x - p);
+                    p_z.fit_fun(ff, ud1, ud2);
+
+                    if (p_z.y >= S[i_max].y) {
+                        // 7. Redukcja (ściągnięcie sympleksu)
+                        for (int i = 0; i <= n; ++i) {
+                            if (i != i_min) {
+                                S[i].x = delta * (S[i].x + S[i_min].x);
+                            }
+                        }
+                    } else {
+                        S[i_max] = p_z;
+                    }
+                }
+            }
+            // Sprawdzenie warunku stopu
+            double max_dist = 0;
+            for (int i = 0; i <= n; ++i) {
+                double dist = norm(S[i_min].x - S[i].x);
+                if (dist > max_dist) {
+                    max_dist = dist;
+                }
+            }
+            if (max_dist < epsilon || solution::f_calls > Nmax) {
+                S[0].flag = (solution::f_calls <= Nmax);
+                break;
+            }
+
+        } while (true);
+        
+        // Znajdź ostateczne najlepsze rozwiązanie
+        int final_best_idx = 0;
+        for (int i = 1; i <= n; i++) {
+            if (S[i].y < S[final_best_idx].y) {
+                final_best_idx = i;
+            }
+        }
+        return S[final_best_idx];
+
+    } catch (string ex_info) {
+        throw ("solution sym_NM(...):\n" + ex_info);
     }
 }
