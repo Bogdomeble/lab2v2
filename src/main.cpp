@@ -633,7 +633,7 @@ void lab3() {
 
         matrix* Y = solve_ode(dff3R, 0, 0.01, 7, Y0, params, NAN);
 
-        ofstream sim_file("lab3_real_simulation.csv");
+        ofstream sim_file(resolvePath("lab3_real_simulation.csv"));
         sim_file << "t,x,vx,y,vy\n";
         int n = get_len(Y[0]);
         for(int i=0; i<n; ++i) {
