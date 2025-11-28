@@ -5,13 +5,14 @@ project(lab2)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Flagi kompilatora
 add_compile_options(-Wall -O3)
 
-# --- KLUCZOWA ZMIANA ---
-# Definiujemy makro preprocesora DATA_DIR, które zawiera bezwzględną ścieżkę do folderu data
-# Dzięki temu C++ będzie wiedział dokładnie gdzie zapisywać pliki
-add_compile_definitions(DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data/")
-# -----------------------
+# --- KLUCZOWA POPRAWKA ---
+# Używamy \" aby przekazać ścieżkę jako string (np. "/home/user/projekt/data/")
+# Bez tych ukośników ścieżka mogłaby być źle interpretowana.
+add_compile_definitions(DATA_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}/data/\")
+# -------------------------
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
