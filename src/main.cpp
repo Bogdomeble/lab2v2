@@ -55,7 +55,7 @@ void lab0() {
     matrix Y0 = matrix(2, 1), // Y0 contains initial conditions
             MT = matrix(2, new double[2]{m2d(opt.x), 0.5}); // MT contains the torque on the pendulum and its duration
     matrix *Y = solve_ode(df0, 0, 0.1, 10, Y0, NAN, MT); // solve the differential equation
-    ofstream Sout("../data/symulacja_lab0.csv");                // define a stream to the .csv file
+    ofstream Sout(resolvePath("symulacja_lab0.csv"));                // define a stream to the .csv file
     Sout << hcat(Y[0], Y[1]);                            // save results in the file
     Sout.close();                                       // close the stream
     delete[] Y;                                         // free the memory of the DE solution
@@ -67,7 +67,7 @@ void lab1() {
 
     // Open a CSV file to save the results.
     // The file will be created in the same folder as the executable.
-    ofstream file("../data/lab1_results.csv");
+    ofstream file(resolvePath("lab1_results.csv"));
 
     // Check if the file was opened correctly
     if (!file.is_open()) {
@@ -195,7 +195,7 @@ void lab1_real()
     matrix* Y_fib = solve_ode(dff1R, 0, 1, 2000, Y0, NAN, params_fib);
 
     // Save Fibonacci simulation results to a file
-    ofstream sim_file_fib("../data/lab_1_real_fibonacci.csv");
+    ofstream sim_file_fib(resolvePath("lab_1_real_fibonacci.csv"));
     sim_file_fib << "t,VA,VB,TB\n";
     for (int i = 0; i < get_len(Y_fib[0]); ++i)
     {
@@ -221,7 +221,7 @@ void lab1_real()
     matrix* Y_lag = solve_ode(dff1R, 0, 1, 2000, Y0, NAN, params_lag);
 
     // Save Lagrange simulation results to a file
-    ofstream sim_file_lag("../data/lab_1_real_lagrange.csv");
+    ofstream sim_file_lag(resolvePath("lab_1_real_lagrange.csv"));
     sim_file_lag << "t,VA,VB,TB\n";
     for (int i = 0; i < get_len(Y_lag[0]); ++i)
     {
@@ -237,7 +237,7 @@ void lab2() {
     srand(time(nullptr));
 
 
-    ofstream file("../data/lab2_results.csv");
+    ofstream file(resolvePath("lab2_results.csv"));
     if (!file.is_open()) {
         cerr << "ERROR: Nie mozna otworzyc pliku lab2_results.csv do zapisu!" << endl;
         return;
@@ -317,7 +317,7 @@ void lab2() {
     // --- Zadanie 5b: Problem rzeczywisty ---
     cout << "--- Laboratorium 2: Optymalizacja dla problemu rzeczywistego ---" << endl;
 
-    ofstream real_problem_file("../data/lab2_real_problem_results.csv");
+    ofstream real_problem_file(resolvePath("lab2_real_problem_results.csv"));
     if (!real_problem_file.is_open()) {
         cerr << "ERROR: Nie mozna otworzyc pliku lab2_real_problem_results.csv do zapisu!" << endl;
     } else {
@@ -393,7 +393,7 @@ void lab2() {
 
                 matrix* Y = solve_ode(df2R, 0.0, 0.1, 100.0, Y0, NAN, ode_params);
 
-                ofstream sim_file("../data/lab2_real_simulation_HJ.csv");
+                ofstream sim_file(resolvePath("lab2_real_simulation_HJ.csv"));
                 if (sim_file.is_open()) {
                     sim_file << "t,alpha,omega\n";
                     int num_steps = get_len(Y[0]);
@@ -422,7 +422,7 @@ void lab2() {
 
                 matrix* Y = solve_ode(df2R, 0.0, 0.1, 100.0, Y0, NAN, ode_params);
 
-                ofstream sim_file("../data/lab2_real_simulation_Rosenbrock.csv");
+                ofstream sim_file(resolvePath("lab2_real_simulation_Rosenbrock.csv"));
                 if (sim_file.is_open()) {
                     sim_file << "t,alpha,omega\n";
                     int num_steps = get_len(Y[0]);
@@ -450,7 +450,7 @@ void lab3() {
     srand(time(nullptr));
 
     // Otwarcie pliku do zapisu wyników
-    ofstream file("../data/lab3_results.csv");
+    ofstream file(resolvePath("lab3_results.csv"));
     if (!file.is_open()) {
         cerr << "Błąd: Nie można otworzyć pliku lab3_results.csv" << endl;
         return;
@@ -560,7 +560,7 @@ void lab3() {
 
     cout << "\n\n--- Lab 3: Problem Rzeczywisty (Pilka) ---" << endl;
 
-        ofstream file_real("../data/lab3_real_problem.csv");
+        ofstream file_real(resolvePath("lab3_real_problem.csv"));
         file_real << "Iteracja,c,v0x_opt,omega_opt,x_end,f_calls\n";
 
         // Parametry Neldera-Meada

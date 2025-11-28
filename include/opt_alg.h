@@ -193,3 +193,6 @@ solution Powell(matrix(*ff)(matrix, matrix, matrix), matrix x0, double epsilon, 
 /// @param ud1 Dane użytkownika 1
 /// @param ud2 Dane użytkownika 2
 solution EA(matrix(*ff)(matrix, matrix, matrix), int N, matrix lb, matrix ub, int mi, int lambda, matrix sigma0, double epsilon, int Nmax, matrix ud1 = NAN, matrix ud2 = NAN); // throw (string);
+
+
+std::string resolvePath(std::string filename);

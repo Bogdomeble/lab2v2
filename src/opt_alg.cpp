@@ -1,6 +1,17 @@
 //opt_alg.cpp
 #include "../include/opt_alg.h"
 #include <fstream>
+#include <string>
+
+
+std::string resolvePath(std::string filename) {
+#ifdef DATA_DIR
+    return std::string(DATA_DIR) + filename;
+#else
+    // Fallback, gdyby nie było kompilowane przez CMake
+    return "data/" + filename;
+#endif
+}
 
 solution MC(matrix (*ff)(matrix, matrix, matrix), int N, matrix lb, matrix ub, double epsilon, int Nmax, matrix ud1,
             matrix ud2) {
@@ -577,7 +588,7 @@ solution sym_NM(matrix (*ff)(matrix, matrix, matrix), matrix x0, double s, doubl
             }
 
         } while (true);
-        
+
         // Znajdź ostateczne najlepsze rozwiązanie
         int final_best_idx = 0;
         for (int i = 1; i <= n; i++) {
