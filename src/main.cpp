@@ -444,7 +444,7 @@ void lab3() {
     double epsilon_pen = 1e-4; // Warunek stopu dla pętli kar
     int max_iter_pen = 20;
 
-    vector<double> a_params = {4.0, 4.4934, 5.0};
+    vector<double> a_params = {4.0, 4.4934, 5.0};;
     int N_opt = 100;
 
     for (double a : a_params) {
