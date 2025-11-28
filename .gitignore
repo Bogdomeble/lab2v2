@@ -1,3 +1,5 @@
+.idea
+.vscode
 build
 build/*
 build/lab2
@@ -25,4 +27,3 @@ build/CMakeFiles/lab2.dir/solution.cpp.o.d
 build/CMakeFiles/lab2.dir/user_funs.cpp.o
 build/CMakeFiles/lab2.dir/user_funs.cpp.o.d
 lab2
-

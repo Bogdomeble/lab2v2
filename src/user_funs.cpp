@@ -308,3 +308,117 @@ matrix ff3T_wew(matrix x, matrix ud1, matrix ud2)
 
     return y_f + kara;
 }
+
+matrix dff3R(double t, matrix Y, matrix ud1, matrix ud2) {
+    // Y(0) = x, Y(1) = vx, Y(2) = y, Y(3) = vy
+    double x = Y(0);
+    double vx = Y(1);
+    double y = Y(2);
+    double vy = Y(3);
+
+    // Parametry fizyczne
+    double m = 0.6;   // kg
+    double r = 0.12;  // m
+    double C = 0.47;
+    double rho = 1.2; // kg/m^3
+    double g = 9.81;  // m/s^2
+    double S = M_PI * r * r;
+
+    // Omega jest przekazywana w ud1 (parametr sterujący, ale stały w czasie symulacji)
+    double omega = ud1(0);
+
+    // Siły oporu (zgodnie z instrukcją: 0.5 * C * rho * S * v * |v|)
+    double Dx = 0.5 * C * rho * S * vx * abs(vx);
+    double Dy = 0.5 * C * rho * S * vy * abs(vy);
+
+    // Siły Magnusa
+    double FMx = rho * vy * omega * M_PI * pow(r, 3);
+    double FMy = rho * vx * omega * M_PI * pow(r, 3);
+
+    // Równania ruchu
+    matrix dY(4, 1);
+    dY(0) = vx;
+    dY(1) = -(Dx + FMx) / m;
+    dY(2) = vy;
+    dY(3) = -(Dy + FMy) / m - g; // Grawitacja działa w dół (przeciwnie do osi Y)
+
+    return dY;
+}
+
+
+matrix ff3R_zew(matrix x, matrix ud1, matrix ud2) {
+    // Zmienne decyzyjne: x(0) = v0x, x(1) = omega
+    double v0x = x(0);
+    double omega = x(1);
+
+    // Parametry kary przekazywane w ud2 (ud2(0)=c)
+    double c = ud2(0);
+
+    // Warunki początkowe symulacji
+    // [x=0, vx=v0x, y=100, vy=0]
+    matrix Y0(4, 1);
+    Y0(0) = 0.0;
+    Y0(1) = v0x;
+    Y0(2) = 100.0;
+    Y0(3) = 0.0;
+
+    // Przekazujemy omegę do równania różniczkowego
+    matrix params(1, 1);
+    params(0) = omega;
+
+    // Symulacja: t_end = 7s, dt = 0.01s
+    matrix* Y = solve_ode(dff3R, 0, 0.01, 7, Y0, params, NAN);
+
+    // Analiza wyników symulacji
+    int n = get_len(Y[0]);
+    double x_end = 0.0; // Wartość x przy uderzeniu w ziemię (y=0)
+    double x_at_50 = 0.0; // Wartość x przy y=50m
+    bool hit_ground = false;
+    bool passed_50 = false;
+
+    // Szukamy momentu przejścia przez y=50 i uderzenia w ziemię
+    for (int i = 0; i < n; ++i) {
+        double current_y = Y[1](i, 2);
+        double current_x = Y[1](i, 0);
+
+        // Sprawdzenie przejścia przez 50m
+        if (!passed_50 && current_y <= 50.0) {
+            x_at_50 = current_x;
+            passed_50 = true;
+        }
+
+        // Sprawdzenie uderzenia w ziemię
+        if (!hit_ground && current_y <= 0.0) {
+            x_end = current_x;
+            hit_ground = true;
+            // Możemy przerwać pętlę, jeśli interesuje nas tylko pierwsze uderzenie
+             // break; // Opcjonalnie, ale solver i tak policzył całość
+        }
+    }
+
+    // Jeśli nie uderzyła w ziemię w ciągu 7s, bierzemy ostatni x (jako fallback)
+    if (!hit_ground) x_end = Y[1](n - 1, 0);
+    // Jeśli nie minęła 50m (dziwne przy spadku ze 100m), bierzemy start
+    if (!passed_50) x_at_50 = 0.0;
+
+    delete[] Y;
+
+    // --- Funkcja celu ---
+    // Maksymalizacja x_end => Minimalizacja -x_end
+    double f_val = -x_end;
+
+    // --- Ograniczenia ---
+    // 1. v0x w [-10, 10] => |v0x| - 10 <= 0
+    double g1 = abs(v0x) - 10.0;
+
+    // 2. omega w [-10, 10] => |omega| - 10 <= 0
+    double g2 = abs(omega) - 10.0;
+
+    // 3. Przy y=50m, x musi być w [3, 7] => odległość od 5 <= 2 => |x_at_50 - 5| - 2 <= 0
+    double g3 = abs(x_at_50 - 5.0) - 2.0;
+
+    // Kara zewnętrzna: c * suma(max(0, g_i)^2)
+    double penalty = c * (pow(max(0.0, g1), 2) + pow(max(0.0, g2), 2) + pow(max(0.0, g3), 2));
+
+    return matrix(f_val + penalty);
+}

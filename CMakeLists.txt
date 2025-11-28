@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.28.3)
 project(lab2)
-
+cmake_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+cmake_include_directories(data)
 set(CMAKE_CXX_STANDARD 17)
 add_compile_options(-Wall -O3)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)

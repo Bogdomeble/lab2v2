@@ -55,7 +55,7 @@ void lab0() {
     matrix Y0 = matrix(2, 1), // Y0 contains initial conditions
             MT = matrix(2, new double[2]{m2d(opt.x), 0.5}); // MT contains the torque on the pendulum and its duration
     matrix *Y = solve_ode(df0, 0, 0.1, 10, Y0, NAN, MT); // solve the differential equation
-    ofstream Sout("symulacja_lab0.csv");                // define a stream to the .csv file
+    ofstream Sout("../data/symulacja_lab0.csv");                // define a stream to the .csv file
     Sout << hcat(Y[0], Y[1]);                            // save results in the file
     Sout.close();                                       // close the stream
     delete[] Y;                                         // free the memory of the DE solution
@@ -67,7 +67,7 @@ void lab1() {
 
     // Open a CSV file to save the results.
     // The file will be created in the same folder as the executable.
-    ofstream file("lab1_results.csv");
+    ofstream file("../data/lab1_results.csv");
 
     // Check if the file was opened correctly
     if (!file.is_open()) {
@@ -195,7 +195,7 @@ void lab1_real()
     matrix* Y_fib = solve_ode(dff1R, 0, 1, 2000, Y0, NAN, params_fib);
 
     // Save Fibonacci simulation results to a file
-    ofstream sim_file_fib("lab_1_real_fibonacci.csv");
+    ofstream sim_file_fib("../data/lab_1_real_fibonacci.csv");
     sim_file_fib << "t,VA,VB,TB\n";
     for (int i = 0; i < get_len(Y_fib[0]); ++i)
     {
@@ -221,7 +221,7 @@ void lab1_real()
     matrix* Y_lag = solve_ode(dff1R, 0, 1, 2000, Y0, NAN, params_lag);
 
     // Save Lagrange simulation results to a file
-    ofstream sim_file_lag("lab_1_real_lagrange.csv");
+    ofstream sim_file_lag("../data/lab_1_real_lagrange.csv");
     sim_file_lag << "t,VA,VB,TB\n";
     for (int i = 0; i < get_len(Y_lag[0]); ++i)
     {
@@ -237,7 +237,7 @@ void lab2() {
     srand(time(nullptr));
 
 
-    ofstream file("lab2_results.csv");
+    ofstream file("../data/lab2_results.csv");
     if (!file.is_open()) {
         cerr << "ERROR: Nie mozna otworzyc pliku lab2_results.csv do zapisu!" << endl;
         return;
@@ -317,7 +317,7 @@ void lab2() {
     // --- Zadanie 5b: Problem rzeczywisty ---
     cout << "--- Laboratorium 2: Optymalizacja dla problemu rzeczywistego ---" << endl;
 
-    ofstream real_problem_file("lab2_real_problem_results.csv");
+    ofstream real_problem_file("../data/lab2_real_problem_results.csv");
     if (!real_problem_file.is_open()) {
         cerr << "ERROR: Nie mozna otworzyc pliku lab2_real_problem_results.csv do zapisu!" << endl;
     } else {
@@ -393,7 +393,7 @@ void lab2() {
 
                 matrix* Y = solve_ode(df2R, 0.0, 0.1, 100.0, Y0, NAN, ode_params);
 
-                ofstream sim_file("lab2_real_simulation_HJ.csv");
+                ofstream sim_file("../data/lab2_real_simulation_HJ.csv");
                 if (sim_file.is_open()) {
                     sim_file << "t,alpha,omega\n";
                     int num_steps = get_len(Y[0]);
@@ -422,7 +422,7 @@ void lab2() {
 
                 matrix* Y = solve_ode(df2R, 0.0, 0.1, 100.0, Y0, NAN, ode_params);
 
-                ofstream sim_file("lab2_real_simulation_Rosenbrock.csv");
+                ofstream sim_file("../data/lab2_real_simulation_Rosenbrock.csv");
                 if (sim_file.is_open()) {
                     sim_file << "t,alpha,omega\n";
                     int num_steps = get_len(Y[0]);
@@ -450,7 +450,7 @@ void lab3() {
     srand(time(nullptr));
 
     // Otwarcie pliku do zapisu wyników
-    ofstream file("lab3_results.csv");
+    ofstream file("../data/lab3_results.csv");
     if (!file.is_open()) {
         cerr << "Błąd: Nie można otworzyć pliku lab3_results.csv" << endl;
         return;
@@ -482,7 +482,7 @@ void lab3() {
         cout << "  Metoda kary zewnętrznej..." << endl;
         for (int i = 0; i < N_opt; ++i) {
             solution::clear_calls();
-            
+
             // Losowy punkt startowy z całego obszaru [-a, a] x [-a, a]
             matrix x0(2, 1);
             x0(0) = -a + (double)rand() / RAND_MAX * (2 * a);
@@ -496,16 +496,16 @@ void lab3() {
                 matrix ud(2, 1);
                 ud(0) = a;
                 ud(1) = c;
-                
+
                 sol = sym_NM(ff3T_zew, x_prev, s, alpha, beta, gamma, delta, epsilon_nm, Nmax - solution::f_calls, ud);
-                
+
                 if (norm(sol.x - x_prev) < epsilon_pen || solution::f_calls >= Nmax) {
                     break;
                 }
                 x_prev = sol.x;
                 c *= dc;
             }
-            
+
             double final_y = m2d(ff3T(sol.x));
             double r = m2d(norm(sol.x));
 
@@ -519,7 +519,7 @@ void lab3() {
         cout << "  Metoda kary wewnętrznej..." << endl;
         for (int i = 0; i < N_opt; ++i) {
             solution::clear_calls();
-            
+
             // Losowy punkt startowy ze ściśle dopuszczalnego obszaru
             matrix x0(2, 1);
             do {
@@ -544,7 +544,7 @@ void lab3() {
                 x_prev = sol.x;
                 c /= dc; // Zmniejszanie 'c' dla metody wewnętrznej
             }
-            
+
             double final_y = m2d(ff3T(sol.x));
             double r = m2d(norm(sol.x));
 
@@ -557,6 +557,94 @@ void lab3() {
 
     file.close();
     cout << "\nZakończono. Wyniki zapisano do pliku lab3_results.csv" << endl;
+
+    cout << "\n\n--- Lab 3: Problem Rzeczywisty (Pilka) ---" << endl;
+
+        ofstream file_real("../data/lab3_real_problem.csv");
+        file_real << "Iteracja,c,v0x_opt,omega_opt,x_end,f_calls\n";
+
+        // Parametry Neldera-Meada
+         s = 0.5;
+         alpha = 1.0, beta = 0.5, gamma = 2.0, delta = 0.5;
+         epsilon_nm = 1e-6;
+         Nmax = 5000;
+
+        // Parametry metody kar
+        double c = 1.0;       // c startowe
+         dc = 2.0;      // Krok zwiększania kary (można dobrać np. 2 lub 5)
+         epsilon_pen = 1e-6;
+        int max_pen_iter = 20;
+
+        // Punkt startowy (losowy w dopuszczalnych granicach [-10, 10])
+        matrix x0(2, 1);
+        x0(0) = -10.0 + (double)rand() / RAND_MAX * 20.0; // v0x
+        x0(1) = -10.0 + (double)rand() / RAND_MAX * 20.0; // omega
+
+        cout << "Punkt startowy: v0x=" << x0(0) << ", omega=" << x0(1) << endl;
+
+        matrix x_prev = x0;
+        solution sol;
+
+        // Pętla metody kar zewnętrznych
+        for (int k = 0; k < max_pen_iter; ++k) {
+            solution::clear_calls();
+            matrix ud2(1, 1);
+            ud2(0) = c;
+
+            // Wywołanie NM dla funkcji z karą
+            // Uwaga: ff3R_zew nie używa ud1, więc dajemy NAN, parametry kary idą w ud2
+            sol = sym_NM(ff3R_zew, x_prev, s, alpha, beta, gamma, delta, epsilon_nm, Nmax, NAN, ud2);
+
+            // Obliczamy rzeczywistą wartość x_end (bez kary) dla logów
+            // Wywołujemy ff3R_zew z c=0, żeby dostać czystą wartość funkcji celu (-x_end)
+            matrix ud2_zero(1, 1); ud2_zero(0) = 0.0;
+            double real_obj = m2d(ff3R_zew(sol.x, NAN, ud2_zero));
+            double x_end_val = -real_obj; // Bo minimalizowaliśmy -x_end
+
+            cout << "Metoda kar it." << k+1 << " c=" << c
+                 << " v0x=" << sol.x(0) << " w=" << sol.x(1)
+                 << " x_end=" << x_end_val << endl;
+
+            file_real << k + 1 << "," << c << ","
+                      << sol.x(0) << "," << sol.x(1) << ","
+                      << x_end_val << "," << solution::f_calls << "\n";
+
+            // Warunek stopu (zmiana x jest mała)
+            if (norm(sol.x - x_prev) < epsilon_pen) {
+                cout << "Osiagnieto zbieznosc metody kar." << endl;
+                break;
+            }
+
+            x_prev = sol.x;
+            c *= dc;
+        }
+        file_real.close();
+
+        // --- Symulacja dla znalezionych optymalnych parametrów ---
+        cout << "Generowanie symulacji dla optymalnego rozwiazania..." << endl;
+
+        double opt_v0x = sol.x(0);
+        double opt_omega = sol.x(1);
+
+        matrix Y0(4, 1);
+        Y0(0) = 0.0; Y0(1) = opt_v0x; Y0(2) = 100.0; Y0(3) = 0.0;
+        matrix params(1, 1);
+        params(0) = opt_omega;
+
+        matrix* Y = solve_ode(dff3R, 0, 0.01, 7, Y0, params, NAN);
+
+        ofstream sim_file("lab3_real_simulation.csv");
+        sim_file << "t,x,vx,y,vy\n";
+        int n = get_len(Y[0]);
+        for(int i=0; i<n; ++i) {
+            sim_file << Y[0](i) << ","
+                     << Y[1](i, 0) << "," << Y[1](i, 1) << ","
+                     << Y[1](i, 2) << "," << Y[1](i, 3) << "\n";
+        }
+        sim_file.close();
+        delete[] Y;
+
+        cout << "Zapisano wyniki symulacji do lab3_real_simulation.csv" << endl;
 }
 
 void lab4() {

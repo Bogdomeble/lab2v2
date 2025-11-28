@@ -22,3 +22,5 @@ matrix df2R(double t, matrix Y, matrix ud1 = NAN, matrix ud2 = NAN);
 matrix ff3T(matrix x, matrix ud1=NAN, matrix ud2=NAN);
 matrix ff3T_zew(matrix x, matrix ud1=NAN, matrix ud2=NAN);
 matrix ff3T_wew(matrix x, matrix ud1=NAN, matrix ud2=NAN);
+matrix dff3R(double t, matrix Y, matrix ud1=NAN, matrix ud2=NAN);
+matrix ff3R_zew(matrix x, matrix ud1=NAN, matrix ud2=NAN);
