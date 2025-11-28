@@ -1,6 +1,7 @@
 #include "../include/user_funs.h"
 #include <cmath>
 #include <vector>
+
 #define _USE_MATH_DEFINES
 // --- Lab 0 Functions ---
 
@@ -237,4 +238,73 @@ matrix df2R(double t, matrix Y, matrix ud1, matrix ud2)
     dY(1) = (M - b * omega) / I; // d(omega)/dt = (M - b*omega)/I
 
     return dY;
+}
+
+// Testowa funkcja celu dla lab3
+matrix ff3T(matrix x, matrix ud1, matrix ud2)
+{
+    double x1 = x(0);
+    double x2 = x(1);
+
+    double term_in_sqrt = pow(x1 / M_PI, 2) + pow(x2 / M_PI, 2);
+    double term = M_PI * sqrt(term_in_sqrt);
+
+    // Warunek zabezpieczający przed dzieleniem przez zero, gdy x1=0 i x2=0
+    // Zgodnie z granicą sin(z)/z -> 1 dla z -> 0
+    if (abs(term) < 1e-9) {
+        return matrix(1.0);
+    }
+
+    return matrix(sin(term) / term);
+}
+
+
+// Funkcja celu z zewnętrzną funkcją kary
+matrix ff3T_zew(matrix x, matrix ud1, matrix ud2)
+{
+    // ud1(0) przechowuje parametr 'a'
+    // ud1(1) przechowuje współczynnik kary 'c'
+    double a = ud1(0);
+    double c = ud1(1);
+
+    // Wartość oryginalnej funkcji celu
+    matrix y_f = ff3T(x);
+
+    // Ograniczenia g(x) <= 0
+    double g1 = -x(0) + 1.0;
+    double g2 = -x(1) + 1.0;
+    double g3 = sqrt(pow(x(0), 2) + pow(x(1), 2)) - a;
+
+    // Obliczenie kary
+    double kara = c * (pow(max(0.0, g1), 2) + pow(max(0.0, g2), 2) + pow(max(0.0, g3), 2));
+
+    return y_f + kara;
+}
+
+// Funkcja celu z wewnętrzną funkcją kary
+matrix ff3T_wew(matrix x, matrix ud1, matrix ud2)
+{
+    // ud1(0) przechowuje parametr 'a'
+    // ud1(1) przechowuje współczynnik kary 'c'
+    double a = ud1(0);
+    double c = ud1(1);
+
+    // Ograniczenia g(x) <= 0
+    double g1 = -x(0) + 1.0;
+    double g2 = -x(1) + 1.0;
+    double g3 = sqrt(pow(x(0), 2) + pow(x(1), 2)) - a;
+
+    // Sprawdzenie, czy punkt leży w obszarze dopuszczalnym
+    // Jeśli nie, zwróć bardzo dużą wartość
+    if (g1 >= 0 || g2 >= 0 || g3 >= 0) {
+        return matrix(1e100); // Wartość "nieskończona"
+    }
+
+    // Wartość oryginalnej funkcji celu
+    matrix y_f = ff3T(x);
+
+    // Obliczenie kary
+    double kara = -c * (1.0 / g1 + 1.0 / g2 + 1.0 / g3);
+
+    return y_f + kara;
 }

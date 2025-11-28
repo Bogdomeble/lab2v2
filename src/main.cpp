@@ -20,7 +20,8 @@ int main() {
         //lab1();
         //test_real_problem_DA50();
         //lab1_real();
-         lab2();
+         //lab2();
+         lab3();
     } catch (string EX_INFO) {
         cerr << "ERROR:\n";
         cerr << EX_INFO << endl << endl;
@@ -446,6 +447,116 @@ void lab2() {
 }
 
 void lab3() {
+    srand(time(nullptr));
+
+    // Otwarcie pliku do zapisu wyników
+    ofstream file("lab3_results.csv");
+    if (!file.is_open()) {
+        cerr << "Błąd: Nie można otworzyć pliku lab3_results.csv" << endl;
+        return;
+    }
+    file << "Metoda,Parametr_a,Iteracja,x0_start,x1_start,x0_end,x1_end,y_end,f_calls,r\n";
+
+    // Parametry dla metody Neldera-Meada
+    double s = 0.5;       // Długość boku sympleksu
+    double alpha = 1.0;   // Odbicie
+    double beta = 0.5;    // Zawężenie
+    double gamma = 2.0;   // Ekspansja
+    double delta = 0.5;   // Redukcja
+    double epsilon_nm = 1e-3; // Dokładność
+    int Nmax = 10000;     // Maksymalna liczba wywołań funkcji celu
+
+    // Parametry dla pętli metody kar
+    double c_start = 1.0;
+    double dc = 5.0;      // Współczynnik skalowania kary
+    double epsilon_pen = 1e-4; // Warunek stopu dla pętli kar
+    int max_iter_pen = 20;
+
+    vector<double> a_params = {4.0, 4.4934, 5.0};;
+    int N_opt = 100;
+
+    for (double a : a_params) {
+        cout << "--- Testowanie dla a = " << a << " ---" << endl;
+
+        // --- ZEWNĘTRZNA FUNKCJA KARY ---
+        cout << "  Metoda kary zewnętrznej..." << endl;
+        for (int i = 0; i < N_opt; ++i) {
+            solution::clear_calls();
+            
+            // Losowy punkt startowy z całego obszaru [-a, a] x [-a, a]
+            matrix x0(2, 1);
+            x0(0) = -a + (double)rand() / RAND_MAX * (2 * a);
+            x0(1) = -a + (double)rand() / RAND_MAX * (2 * a);
+
+            matrix x_prev = x0;
+            double c = c_start;
+            solution sol;
+
+            for (int k = 0; k < max_iter_pen; ++k) {
+                matrix ud(2, 1);
+                ud(0) = a;
+                ud(1) = c;
+                
+                sol = sym_NM(ff3T_zew, x_prev, s, alpha, beta, gamma, delta, epsilon_nm, Nmax - solution::f_calls, ud);
+                
+                if (norm(sol.x - x_prev) < epsilon_pen || solution::f_calls >= Nmax) {
+                    break;
+                }
+                x_prev = sol.x;
+                c *= dc;
+            }
+            
+            double final_y = m2d(ff3T(sol.x));
+            double r = m2d(norm(sol.x));
+
+            file << "Zewnetrzna," << a << "," << i + 1 << ","
+                 << x0(0) << "," << x0(1) << ","
+                 << sol.x(0) << "," << sol.x(1) << "," << final_y << ","
+                 << solution::f_calls << "," << r << "\n";
+        }
+
+        // --- WEWNĘTRZNA FUNKCJA KARY ---
+        cout << "  Metoda kary wewnętrznej..." << endl;
+        for (int i = 0; i < N_opt; ++i) {
+            solution::clear_calls();
+            
+            // Losowy punkt startowy ze ściśle dopuszczalnego obszaru
+            matrix x0(2, 1);
+            do {
+                x0(0) = 1.001 + (double)rand() / RAND_MAX * (a - 1.002);
+                x0(1) = 1.001 + (double)rand() / RAND_MAX * (a - 1.002);
+            } while (sqrt(pow(x0(0), 2) + pow(x0(1), 2)) >= a - 0.001);
+
+            matrix x_prev = x0;
+            double c = 10.0; // Wyższy c0 dla metody wewn.
+            solution sol;
+
+            for (int k = 0; k < max_iter_pen; ++k) {
+                matrix ud(2, 1);
+                ud(0) = a;
+                ud(1) = c;
+
+                sol = sym_NM(ff3T_wew, x_prev, s, alpha, beta, gamma, delta, epsilon_nm, Nmax - solution::f_calls, ud);
+
+                if (norm(sol.x - x_prev) < epsilon_pen || solution::f_calls >= Nmax) {
+                    break;
+                }
+                x_prev = sol.x;
+                c /= dc; // Zmniejszanie 'c' dla metody wewnętrznej
+            }
+            
+            double final_y = m2d(ff3T(sol.x));
+            double r = m2d(norm(sol.x));
+
+            file << "Wewnetrzna," << a << "," << i + 1 << ","
+                 << x0(0) << "," << x0(1) << ","
+                 << sol.x(0) << "," << sol.x(1) << "," << final_y << ","
+                 << solution::f_calls << "," << r << "\n";
+        }
+    }
+
+    file.close();
+    cout << "\nZakończono. Wyniki zapisano do pliku lab3_results.csv" << endl;
 }
 
 void lab4() {
