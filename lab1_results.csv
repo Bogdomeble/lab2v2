@@ -1,2 +1,0 @@
-Iteration,x0_start,Exp_start,Exp_end,Exp_f_calls,Fib_with_Exp_x,Fib_with_Exp_y,Fib_with_Exp_f_calls,Lag_with_Exp_x,Lag_with_Exp_y,Lag_with_Exp_f_calls,Fib_no_Exp_x,Fib_no_Exp_y,Fib_no_Exp_f_calls,Lag_no_Exp_x,Lag_no_Exp_y,Lag_no_Exp_f_calls
-1,-58.4682,11.2894,143.131,12,62.7482,-0.921148,35,nan,nan,nan,4.13945e-06,3.35543e-16,36,2.24381e-13,-7.15717e-18,6

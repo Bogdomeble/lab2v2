@@ -1,3 +1,0 @@
-/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/build/CMakeFiles/lab2.dir
-/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/build/CMakeFiles/edit_cache.dir
-/mnt/e/Moje Dokumenty/ITE/Semestr_5/Optymalizacja/Laboratoria/projekt_github/build/CMakeFiles/rebuild_cache.dir
