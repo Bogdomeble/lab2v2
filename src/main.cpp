@@ -450,7 +450,8 @@ void lab3() {
     srand(time(nullptr));
 
     // Otwarcie pliku do zapisu wyników
-    ofstream file(resolvePath("lab3_results.csv"));
+    
+    ofstream file("../data/lab3_results.csv");
     if (!file.is_open()) {
         cerr << "Błąd: Nie można otworzyć pliku lab3_results.csv" << endl;
         return;
