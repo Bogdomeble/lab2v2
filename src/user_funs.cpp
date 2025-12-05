@@ -422,3 +422,106 @@ matrix ff3R_zew(matrix x, matrix ud1, matrix ud2) {
 
     return matrix(f_val + penalty);
 }
+
+// --- IMPLEMENTACJA LAB 4 ---
+
+// Testowa funkcja celu: f(x) = 1/6*x1^6 - 1.05*x1^4 + 2*x1^2 + x2^2 + x1*x2
+matrix ff4T(matrix x, matrix ud1, matrix ud2) {
+    double x1 = x(0);
+    double x2 = x(1);
+    double y = (1.0/6.0)*pow(x1, 6) - 1.05*pow(x1, 4) + 2.0*pow(x1, 2) + pow(x2, 2) + x1*x2;
+    return matrix(y);
+}
+
+// Gradient testowej funkcji celu
+matrix gf4T(matrix x, matrix ud1, matrix ud2) {
+    double x1 = x(0);
+    double x2 = x(1);
+    matrix g(2, 1);
+    // df/dx1 = x1^5 - 4.2*x1^3 + 4*x1 + x2
+    g(0) = pow(x1, 5) - 4.2*pow(x1, 3) + 4.0*x1 + x2;
+    // df/dx2 = 2*x2 + x1
+    g(1) = 2.0*x2 + x1;
+    return g;
+}
+
+// Hesjan testowej funkcji celu
+matrix Hf4T(matrix x, matrix ud1, matrix ud2) {
+    double x1 = x(0);
+    double x2 = x(1);
+    matrix H(2, 2);
+    // d2f/dx1^2 = 5*x1^4 - 12.6*x1^2 + 4
+    H(0, 0) = 5.0*pow(x1, 4) - 12.6*pow(x1, 2) + 4.0;
+    // d2f/dx1dx2 = 1
+    H(0, 1) = 1.0;
+    // d2f/dx2dx1 = 1
+    H(1, 0) = 1.0;
+    // d2f/dx2^2 = 2
+    H(1, 1) = 2.0;
+    return H;
+}
+
+// Funkcja pomocnicza: sigmoid
+double sigmoid(double z) {
+    if (z > 20.0) return 1.0;
+    if (z < -20.0) return 0.0;
+    return 1.0 / (1.0 + exp(-z));
+}
+
+// Rzeczywista funkcja celu: Log-Loss
+// theta: wektor parametrów (3x1)
+// ud1: X (3x100) - macierz cech
+// ud2: Y (1x100) - wektor etykiet
+matrix ff4R(matrix theta, matrix ud1, matrix ud2) {
+    matrix X = ud1;
+    matrix Y = ud2;
+    
+    // ZMIANA: Zamiast get_len(trans(Y)), używamy get_size(Y)
+    int* size = get_size(Y);
+    int m = size[1]; // Y jest 1xm, więc liczba próbek to drugi wymiar
+    delete[] size;
+    
+    double J = 0.0;
+    for (int i = 0; i < m; ++i) {
+        matrix xi = get_col(X, i);       // i-ta kolumna X (3x1)
+        double yi = Y(0, i);             // i-ta etykieta
+        
+        double z = m2d(trans(theta) * xi);
+        double h = sigmoid(z);
+        
+        // Zabezpieczenie logarytmu
+        double eps = 1e-15;
+        if (h < eps) h = eps;
+        if (h > 1.0 - eps) h = 1.0 - eps;
+        
+        J += yi * log(h) + (1.0 - yi) * log(1.0 - h);
+    }
+    
+    return matrix(-J / m);
+}
+
+// Gradient rzeczywistej funkcji celu
+matrix gf4R(matrix theta, matrix ud1, matrix ud2) {
+    matrix X = ud1;
+    matrix Y = ud2;
+    
+    // ZMIANA: Zamiast get_len(trans(Y)), używamy get_size(Y)
+    int* size = get_size(Y);
+    int m = size[1]; // Y jest 1xm
+    delete[] size;
+    
+    matrix grad(3, 1); // Wektor zerowy 3x1
+    
+    for (int i = 0; i < m; ++i) {
+        matrix xi = get_col(X, i);
+        double yi = Y(0, i);
+        
+        double z = m2d(trans(theta) * xi);
+        double h = sigmoid(z);
+        
+        // Sumowanie: (h(xi) - yi) * xi
+        grad = grad + (h - yi) * xi;
+    }
+    
+    return grad / m;
+}

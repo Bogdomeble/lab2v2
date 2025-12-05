@@ -2,6 +2,8 @@
 #include "../include/opt_alg.h"
 #include <fstream>
 #include <string>
+#include <cmath>
+
 
 
 std::string resolvePath(std::string filename) {
@@ -417,44 +419,6 @@ solution pen(matrix (*ff)(matrix, matrix, matrix), matrix x0, double c, double d
     }
 }
 
-
-solution SD(matrix (*ff)(matrix, matrix, matrix), matrix (*gf)(matrix, matrix, matrix), matrix x0, double h0,
-            double epsilon, int Nmax, matrix ud1, matrix ud2) {
-    try {
-        solution Xopt;
-
-
-        return Xopt;
-    } catch (string ex_info) {
-        throw ("solution SD(...):\n" + ex_info);
-    }
-}
-
-solution CG(matrix (*ff)(matrix, matrix, matrix), matrix (*gf)(matrix, matrix, matrix), matrix x0, double h0,
-            double epsilon, int Nmax, matrix ud1, matrix ud2) {
-    try {
-        solution Xopt;
-
-
-        return Xopt;
-    } catch (string ex_info) {
-        throw ("solution CG(...):\n" + ex_info);
-    }
-}
-
-solution Newton(matrix (*ff)(matrix, matrix, matrix), matrix (*gf)(matrix, matrix, matrix),
-                matrix (*Hf)(matrix, matrix, matrix), matrix x0, double h0, double epsilon, int Nmax, matrix ud1,
-                matrix ud2) {
-    try {
-        solution Xopt;
-
-
-        return Xopt;
-    } catch (string ex_info) {
-        throw ("solution Newton(...):\n" + ex_info);
-    }
-}
-
 solution golden(matrix (*ff)(matrix, matrix, matrix), double a, double b, double epsilon, int Nmax, matrix ud1,
                 matrix ud2) {
     try {
@@ -600,5 +564,169 @@ solution sym_NM(matrix (*ff)(matrix, matrix, matrix), matrix x0, double s, doubl
 
     } catch (string ex_info) {
         throw ("solution sym_NM(...):\n" + ex_info);
+    }
+}
+
+// Funkcja pomocnicza: Złoty podział dla szukania kroku h
+// Minimalizuje f(x0 + h * d) w przedziale [a, b]
+double golden_search(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix d, matrix ud1, matrix ud2, double a, double b, double epsilon, int Nmax) {
+    double alpha = (sqrt(5.0) - 1.0) / 2.0;
+    double c = b - alpha * (b - a);
+    double d_point = a + alpha * (b - a); // nazwa d_point, bo d to kierunek
+    
+    // Obliczenie wartości funkcji w punktach c i d_point
+    matrix xc = x0 + c * d;
+    matrix xd = x0 + d_point * d;
+    double fc = m2d(ff(xc, ud1, ud2));
+    double fd = m2d(ff(xd, ud1, ud2));
+    
+    int calls = 0;
+    while ((b - a) > epsilon && calls < Nmax) {
+        if (fc < fd) {
+            b = d_point;
+            d_point = c;
+            fd = fc;
+            c = b - alpha * (b - a);
+            xc = x0 + c * d;
+            fc = m2d(ff(xc, ud1, ud2));
+        } else {
+            a = c;
+            c = d_point;
+            fc = fd;
+            d_point = a + alpha * (b - a);
+            xd = x0 + d_point * d;
+            fd = m2d(ff(xd, ud1, ud2));
+        }
+        calls++;
+    }
+    return (a + b) / 2.0;
+}
+
+solution SD(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, matrix), matrix x0, double h0, double epsilon, int Nmax, matrix ud1, matrix ud2) {
+    try {
+        solution X(x0);
+        solution X_prev;
+        matrix d;
+        double h;
+        
+        // Oblicz wartość początkową
+        X.fit_fun(ff, ud1, ud2);
+        
+        while (solution::f_calls < Nmax) {
+            // 1. Wyznacz kierunek (antygradient)
+            d = -gf(X.x, ud1, ud2);
+            
+            // 2. Wyznacz długość kroku
+            if (std::isnan(h0)) {
+                // Zmiennokrokowy (Metoda Złotego Podziału)
+                // Szukamy w przedziale np. [0, 1] - typowe dla normalizowanych problemów, lub większe
+                h = golden_search(ff, X.x, d, ud1, ud2, 0.0, 1.0, epsilon, Nmax); 
+            } else {
+                // Stałokrokowy
+                h = h0;
+            }
+            
+            // 3. Nowy punkt
+            X_prev = X;
+            X.x = X.x + h * d;
+            X.fit_fun(ff, ud1, ud2);
+            
+            // 4. Warunek stopu (zmiana argumentu)
+            if (norm(X.x - X_prev.x) < epsilon) {
+                X.flag = 1; // Sukces
+                break;
+            }
+        }
+        
+        if (solution::f_calls >= Nmax) X.flag = 0;
+        return X;
+    } catch (string ex_info) {
+        throw ("solution SD(...):\n" + ex_info);
+    }
+}
+
+solution CG(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, matrix), matrix x0, double h0, double epsilon, int Nmax, matrix ud1, matrix ud2) {
+    try {
+        solution X(x0);
+        solution X_prev;
+        matrix d, d_prev, g, g_prev;
+        double h, beta;
+        
+        X.fit_fun(ff, ud1, ud2);
+        g = gf(X.x, ud1, ud2);
+        d = -g;
+        
+        while (solution::f_calls < Nmax) {
+            // Wyznacz długość kroku
+             if (std::isnan(h0)) {
+                h = golden_search(ff, X.x, d, ud1, ud2, 0.0, 1.0, epsilon, Nmax);
+            } else {
+                h = h0;
+            }
+            
+            X_prev = X;
+            X.x = X.x + h * d;
+            X.fit_fun(ff, ud1, ud2);
+            
+            if (norm(X.x - X_prev.x) < epsilon) {
+                X.flag = 1;
+                break;
+            }
+            
+            g_prev = g;
+            g = gf(X.x, ud1, ud2);
+            
+            // Obliczenie Beta (Fletcher-Reeves)
+            double nom = pow(norm(g), 2);
+            double den = pow(norm(g_prev), 2);
+            beta = nom / den;
+            
+            d_prev = d;
+            d = -g + beta * d_prev;
+        }
+        
+        if (solution::f_calls >= Nmax) X.flag = 0;
+        return X;
+    } catch (string ex_info) {
+        throw ("solution CG(...):\n" + ex_info);
+    }
+}
+
+solution Newton(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, matrix), matrix(*Hf)(matrix, matrix, matrix), matrix x0, double h0, double epsilon, int Nmax, matrix ud1, matrix ud2) {
+    try {
+        solution X(x0);
+        solution X_prev;
+        matrix d, g, H;
+        double h;
+        
+        X.fit_fun(ff, ud1, ud2);
+        
+        while (solution::f_calls < Nmax) {
+            g = gf(X.x, ud1, ud2);
+            H = Hf(X.x, ud1, ud2);
+            
+            // Kierunek Newtona: d = -H^-1 * g
+            d = -inv(H) * g;
+            
+            if (std::isnan(h0)) {
+                h = golden_search(ff, X.x, d, ud1, ud2, 0.0, 1.0, epsilon, Nmax);
+            } else {
+                h = h0;
+            }
+            
+            X_prev = X;
+            X.x = X.x + h * d;
+            X.fit_fun(ff, ud1, ud2);
+            
+            if (norm(X.x - X_prev.x) < epsilon) {
+                X.flag = 1;
+                break;
+            }
+        }
+        
+        if (solution::f_calls >= Nmax) X.flag = 0;
+        return X;
+    } catch (string ex_info) {
+        throw ("solution Newton(...):\n" + ex_info);
     }
 }

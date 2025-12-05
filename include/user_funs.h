@@ -24,3 +24,16 @@ matrix ff3T_zew(matrix x, matrix ud1=NAN, matrix ud2=NAN);
 matrix ff3T_wew(matrix x, matrix ud1=NAN, matrix ud2=NAN);
 matrix dff3R(double t, matrix Y, matrix ud1=NAN, matrix ud2=NAN);
 matrix ff3R_zew(matrix x, matrix ud1=NAN, matrix ud2=NAN);
+
+// --- Funkcje Lab 4 ---
+// Testowa funkcja celu
+matrix ff4T(matrix x, matrix ud1 = NAN, matrix ud2 = NAN);
+// Gradient testowej funkcji celu
+matrix gf4T(matrix x, matrix ud1 = NAN, matrix ud2 = NAN);
+// Hesjan testowej funkcji celu
+matrix Hf4T(matrix x, matrix ud1 = NAN, matrix ud2 = NAN);
+
+// Rzeczywista funkcja celu (Regresja logistyczna)
+matrix ff4R(matrix theta, matrix ud1, matrix ud2);
+// Gradient rzeczywistej funkcji celu
+matrix gf4R(matrix theta, matrix ud1, matrix ud2);
