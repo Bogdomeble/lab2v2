@@ -1,0 +1,1 @@
+bodul nie zmieniaj kodu
