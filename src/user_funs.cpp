@@ -525,3 +525,100 @@ matrix gf4R(matrix theta, matrix ud1, matrix ud2) {
     
     return grad / m;
 }
+
+// --- Funkcje Lab 5 ---
+
+// Testowa funkcja celu: F(x) = w*f1 + (1-w)*f2
+// --- Fragment pliku src/user_funs.cpp ---
+
+matrix ff5T(matrix x, matrix ud1, matrix ud2) {
+    double w = ud1(0);
+    double a = ud2(0);
+    
+    // Zabezpieczenie przed x będącym NAN
+    if (std::isnan(x(0)) || std::isnan(x(1))) return matrix(1e100);
+
+    double x1 = x(0);
+    double x2 = x(1);
+
+    double f1 = a * (pow(x1 - 3.0, 2) + pow(x2 - 3.0, 2));
+    double f2 = (1.0 / a) * (pow(x1 + 3.0, 2) + pow(x2 + 3.0, 2));
+
+    return matrix(w * f1 + (1.0 - w) * f2);
+}
+
+// Rzeczywista funkcja celu: F(x) = w*f1 + (1-w)*f2 + Kara
+matrix ff5R(matrix x, matrix ud1, matrix ud2) {
+    matrix y;
+    double w = ud1(0); // Waga
+    
+    // Zmienne decyzyjne (przeliczone na jednostki SI: metry)
+    double l = x(0); // długość [m]
+    double d = x(1); // średnica [m]
+
+    // Parametry stałe
+    double P = 2000.0;        // Siła [N] (2 kN)
+    double E = 1.2e11;        // Moduł Younga [Pa] (120 GPa)
+    double ro = 8920.0;       // Gęstość [kg/m^3]
+    double u_max = 0.0025;    // Max ugięcie [m] (2.5 mm)
+    double sigma_max = 300e6; // Max naprężenie [Pa] (300 MPa)
+    
+    // Kryteria (Funkcje celu)
+    // f1: Masa [kg]
+    double mass = ro * l * M_PI * pow(d / 2.0, 2);
+    
+    // f2: Ugięcie [m]
+    // u = (64 * P * l^3) / (3 * E * pi * d^4)
+    double deflection = (64.0 * P * pow(l, 3)) / (3.0 * E * M_PI * pow(d, 4));
+    
+    // Naprężenie [Pa] (potrzebne do ograniczeń)
+    // sigma = (32 * P * l) / (pi * d^3)
+    double sigma = (32.0 * P * l) / (M_PI * pow(d, 3));
+
+    // Ograniczenia (Zewnętrzna funkcja kary)
+    // g_i(x) <= 0
+    
+    double penalty = 0.0;
+    double c = 1e12; // Współczynnik kary (wysoki ze względu na różne rzędy wielkości)
+
+    // 1. Ograniczenia geometryczne
+    // l E [0.2, 1.0] m
+    double g1 = 0.2 - l;
+    double g2 = l - 1.0;
+    // d E [0.01, 0.05] m
+    double g3 = 0.01 - d;
+    double g4 = d - 0.05;
+
+    // 2. Ograniczenia fizyczne
+    // u <= u_max
+    double g5 = deflection - u_max;
+    // sigma <= sigma_max
+    double g6 = sigma - sigma_max;
+
+    // Sumowanie kar (kwadraty naruszeń)
+    // Używamy normalizacji ograniczeń, aby kara była bardziej zrównoważona
+    // (gdybyśmy nie normalizowali, sigma rzędu 10^8 zdominowałaby wszystko)
+    
+    // Normalizacja naruszeń fizycznych: (val / limit) - 1 <= 0
+    double g5_norm = (deflection / u_max) - 1.0;
+    double g6_norm = (sigma / sigma_max) - 1.0;
+    
+    // Geometryczne mają małe wartości, można je zostawić lub zwiększyć wagę
+    if (g1 > 0) penalty += c * pow(g1, 2);
+    if (g2 > 0) penalty += c * pow(g2, 2);
+    if (g3 > 0) penalty += c * pow(g3, 2);
+    if (g4 > 0) penalty += c * pow(g4, 2);
+    
+    // Fizyczne znormalizowane mnożymy przez c
+    // (można dobrać inne c dla znormalizowanych, ale 1e12 powinno być ok,
+    //  bo f1 ~ 2-10, f2 ~ 0.001. Bez kary f2 jest pomijalne przy f1.
+    //  Ważne, by kara była większa niż zysk z minimalizacji funkcji)
+    
+    double c_phys = 1e6; // Mniejszy współczynnik dla znormalizowanych
+    if (g5_norm > 0) penalty += c_phys * pow(g5_norm, 2);
+    if (g6_norm > 0) penalty += c_phys * pow(g6_norm, 2);
+
+    // Wartość funkcji ważonej + kara
+    y = w * mass + (1.0 - w) * deflection + penalty;
+    return y;
+}

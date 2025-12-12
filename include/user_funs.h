@@ -37,3 +37,12 @@ matrix Hf4T(matrix x, matrix ud1 = NAN, matrix ud2 = NAN);
 matrix ff4R(matrix theta, matrix ud1, matrix ud2);
 // Gradient rzeczywistej funkcji celu
 matrix gf4R(matrix theta, matrix ud1, matrix ud2);
+// --- Funkcje Lab 5 ---
+
+/// Testowa funkcja celu (Ważona suma)
+/// ud1(0) = w (waga), ud2(0) = a (parametr)
+matrix ff5T(matrix x, matrix ud1, matrix ud2);
+
+/// Rzeczywista funkcja celu (Ważona suma z funkcją kary)
+/// ud1(0) = w (waga)
+matrix ff5R(matrix x, matrix ud1, matrix ud2);

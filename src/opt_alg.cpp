@@ -431,17 +431,6 @@ solution golden(matrix (*ff)(matrix, matrix, matrix), double a, double b, double
     }
 }
 
-solution Powell(matrix (*ff)(matrix, matrix, matrix), matrix x0, double epsilon, int Nmax, matrix ud1, matrix ud2) {
-    try {
-        solution Xopt;
-
-
-        return Xopt;
-    } catch (string ex_info) {
-        throw ("solution Powell(...):\n" + ex_info);
-    }
-}
-
 solution EA(matrix (*ff)(matrix, matrix, matrix), int N, matrix lb, matrix ub, int mi, int lambda, matrix sigma0,
             double epsilon, int Nmax, matrix ud1, matrix ud2) {
     try {
@@ -728,5 +717,127 @@ solution Newton(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix,
         return X;
     } catch (string ex_info) {
         throw ("solution Newton(...):\n" + ex_info);
+    }
+}
+
+// Zmienne statyczne
+static matrix (*powell_ff)(matrix, matrix, matrix) = nullptr;
+static matrix powell_x0;
+static matrix powell_d;
+static matrix powell_ud1;
+static matrix powell_ud2;
+
+// Wrapper
+matrix ff_powell_wrapper(matrix h, matrix ud1, matrix ud2) {
+    // h(0) to szukany skalar (krok)
+    if (std::isnan(h(0))) return matrix(1e100); // Zabezpieczenie
+    matrix x = powell_x0 + h(0) * powell_d;
+    return powell_ff(x, powell_ud1, powell_ud2);
+}
+
+solution Powell(matrix(*ff)(matrix, matrix, matrix), matrix x0, double epsilon, int Nmax, matrix ud1, matrix ud2) {
+    try {
+        int n = get_len(x0);
+        matrix D = ident_mat(n); // Macierz kierunków
+        solution P(x0);
+        P.fit_fun(ff, ud1, ud2); // Oblicz wartość startową
+        
+        powell_ff = ff;
+        powell_ud1 = ud1;
+        powell_ud2 = ud2;
+
+        while (solution::f_calls < Nmax) {
+            matrix P0 = P.x; // Zapamiętaj punkt startowy tej iteracji
+            
+            // Pętla po kierunkach
+            for (int i = 0; i < n; ++i) {
+                powell_x0 = P.x;
+                powell_d = get_col(D, i);
+                
+                double* interval = nullptr;
+                solution h_opt;
+                bool success = false;
+
+                try {
+                    // 1. Ekspansja
+                    interval = expansion(ff_powell_wrapper, 0.0, 0.1, 2.0, Nmax);
+                    
+                    // 2. Złoty podział
+                    if (interval != nullptr && !std::isnan(interval[0]) && !std::isnan(interval[1])) {
+                        h_opt = golden(ff_powell_wrapper, interval[0], interval[1], epsilon, Nmax);
+                        success = true;
+                    }
+                } catch (...) {
+                    // Ignorujemy błędy w pojedynczym kroku, próbujemy iść dalej lub kończymy
+                    success = false;
+                }
+
+                // Sprzątanie po ekspansji
+                if (interval != nullptr) {
+                    delete[] interval;
+                    interval = nullptr;
+                }
+
+                // Aktualizacja punktu TYLKO jeśli znaleziono poprawny krok
+                if (success && !std::isnan(h_opt.x(0))) {
+                    P.x = P.x + h_opt.x(0) * powell_d;
+                }
+                
+                // Check limitu wywołań wewnątrz pętli
+                if (solution::f_calls >= Nmax) {
+                    P.fit_fun(ff, ud1, ud2);
+                    P.flag = 0;
+                    return P;
+                }
+            }
+
+            // Sprawdzenie zbieżności: ||P_n - P_0|| < epsilon
+            if (norm(P.x - P0) < epsilon) {
+                P.fit_fun(ff, ud1, ud2);
+                P.flag = 1;
+                return P;
+            }
+            
+            // Aktualizacja bazy kierunków
+            matrix new_dir = P.x - P0;
+            if (norm(new_dir) > 1e-9) { 
+                // Przesuń kierunki: usuń pierwszy, dodaj nowy na koniec
+                matrix D_new(n, n);
+                for (int i = 0; i < n - 1; ++i) {
+                    D_new.set_col(get_col(D, i + 1), i);
+                }
+                D_new.set_col(new_dir, n - 1);
+                D = D_new;
+
+                // Dodatkowy krok w nowym kierunku sprzężonym
+                powell_x0 = P.x;
+                powell_d = new_dir;
+                
+                double* interval = nullptr;
+                try {
+                    interval = expansion(ff_powell_wrapper, 0.0, 0.1, 2.0, Nmax);
+                    if (interval != nullptr && !std::isnan(interval[0]) && !std::isnan(interval[1])) {
+                         solution h_opt = golden(ff_powell_wrapper, interval[0], interval[1], epsilon, Nmax);
+                         if (!std::isnan(h_opt.x(0))) {
+                             P.x = P.x + h_opt.x(0) * new_dir;
+                         }
+                    }
+                } catch (...) {
+                    // Ignoruj błąd optymalizacji w nowym kierunku
+                }
+                if (interval != nullptr) delete[] interval;
+            }
+        }
+
+        P.fit_fun(ff, ud1, ud2);
+        P.flag = 0; // Przekroczono Nmax
+        return P;
+        
+    } catch (string ex_info) {
+        // W ostateczności zwróć to co mamy, zamiast zabijać program
+        solution P(x0);
+        P.fit_fun(ff, ud1, ud2);
+        P.flag = -1;
+        return P;
     }
 }
