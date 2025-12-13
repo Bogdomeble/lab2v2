@@ -1,3 +1,4 @@
+// include/user_funs.h
 // user_funs.h
 #pragma once
 
@@ -27,6 +28,12 @@ matrix ff3R_zew(matrix x, matrix ud1=NAN, matrix ud2=NAN);
 
 // --- Funkcje Lab 4 ---
 // Testowa funkcja celu
+//
+
+matrix read_matrix_semicolon(string path, int rows, int cols);
+
+double calculate_accuracy(matrix theta, matrix X, matrix Y);
+
 matrix ff4T(matrix x, matrix ud1 = NAN, matrix ud2 = NAN);
 // Gradient testowej funkcji celu
 matrix gf4T(matrix x, matrix ud1 = NAN, matrix ud2 = NAN);

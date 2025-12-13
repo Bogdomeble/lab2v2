@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Flagi kompilatora
-add_compile_options(-Wall -O3)
+add_compile_options(-Wall -O3 -g)
 
 # --- KLUCZOWA POPRAWKA ---
 # Używamy \" aby przekazać ścieżkę jako string (np. "/home/user/projekt/data/")

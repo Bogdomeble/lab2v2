@@ -1,0 +1,3665 @@
+Project Collection
+Total files: 11
+================================================================================
+
+INDEX:
+include/matrix.h
+include/ode_solver.h
+include/opt_alg.h
+include/solution.h
+include/user_funs.h
+src/main.cpp
+src/matrix.cpp
+src/ode_solver.cpp
+src/opt_alg.cpp
+src/solution.cpp
+src/user_funs.cpp
+--------------------------------------------------------------------------------
+
+
+================================================================================
+FILE: include/matrix.h
+================================================================================
+
+// include/matrix.h
+//Ten plik nie powinien być edytowany
+
+#pragma once
+
+#include<iostream>
+#include<string>
+#include<sstream>
+#include<fstream>
+#include<random>
+#include<chrono>
+#include<memory>
+
+using namespace std;
+
+
+#ifndef SEP_SYMBOL
+/// Domyślna wartość separatora dla wypisywania macierzy.
+///
+/// @remarks
+/// Sprawiłem, by się dało zmieniać przez `#define` przed `#include`,
+/// ale przy kompilacji wszystkiego innego jako bibliotekę może
+/// hardcodować to za ostatnio ustawioną wartość przed kompilacją,
+/// więc może lepiej tego nie robić. Kod w sumie słaby do w ogóle
+/// kompilacji na bibliotekę i do rozdzielania na wiele plików programów
+/// zależnych, nie ma zabezpieczeń przez wieloma dyrektywami `#include`
+/// więc może wywalać błędy.
+#define SEP_SYMBOL ','
+#endif
+
+class matrix
+{
+	/// Wymiary (NxM)
+	int n, m;
+	/// Tablica dwuwymiarowa (z komórkami macierzy)
+	double** M;
+	/// Zwraca wymiary macierzy N oraz M
+	friend int* get_size(const matrix&);
+	/// Zwraca długość wektora pionowego N (macierzy Nx1).
+	friend int get_len(const matrix&); // throw (string);
+public:
+	/// Tworzy macierz 1x1 o podanej wartości. Jest również wykorzystywany jako
+	/// konstruktor konwertujący (zamienia m. in. double i int na matrix).
+	matrix(double = 0.0);
+	/// Tworzy macierz nxm, której każdy element jest równy
+	/// trzeciemu argumentowi.
+	matrix(int, int, double = 0.0); // throw (string);
+	/// Tworzy macierz nx1 (wektor pionowy) i wypełnia wartościami
+	/// podanymi w tablicy 1D.
+	///
+	/// @throw string Wiadomość o błędzie
+	matrix(int, double*); // throw (string);
+	/// Tworzy macierz nxm i wypełnia wartościami podanymi w tablicy
+	/// 2D.
+	///
+	/// @throw string Wiadomość o błędzie
+	matrix(int, int, double**); // throw (string);
+	/// Konstruktor kopiujący.
+	matrix(const matrix&);
+	/// Destruktor.
+	~matrix();
+	/// Operator przypisania.
+	matrix& operator=(const matrix&);
+	/// Zwraca wskazaną kolumnę macierzy w postaci macierzy nx1
+    /// (rezultat zwracany jest przez wartość -> użycie operatora
+	/// **nie jest l-wartością**
+	///
+	/// @throw string Wiadomość o błędzie
+	matrix operator[](int) const; // throw (string);
+	/// Operator zwraca wybrany element macierzy
+	/// (mogą być wykorzystane do konwersji `matrix` na `double`)
+	///
+	/// @throw string Wiadomość o błędzie
+	double& operator()(int = 0, int = 0); // throw (string);
+	/// Operator zwraca wybrany element macierzy
+	/// (mogą być wykorzystane do konwersji `matrix` na `double`)
+	///
+	/// @throw string Wiadomość o błędzie
+	double operator()(int = 0, int = 0) const; // throw (string);
+	/// Wstawia we wskazaną kolumnę wektor pionowy (macierz nx1)
+	void set_col(const matrix&, int); // throw (string);
+	/// Wstawia we wskazaną kolumnę wektor poziomy (macierz 1xm)
+	///
+	/// @throw string Wiadomość o błędzie
+	void set_row(const matrix&, int); // throw (string);
+	/// Dodaje do macierzy nową kolumnę i wypełnia ją podaną wartością
+	///
+	/// @throw string Wiadomość o błędzie
+	void add_col(double = 0.0);
+	/// Dodaje do macierzy nowy wiersz i wypełnia go podaną wartością
+	///
+	/// @throw string Wiadomość o błędzie
+	void add_row(double = 0.0);
+	/// Dodaje do macierzy nową kolumnę i wstawiaw nią podany wektor
+	/// pionowy (macierz nx1)
+	void add_col(const matrix&); // throw (string);
+	/// Dodaje do macierzy nowy wiersz i wstawia w niego podany
+	/// wektor poziomu (macierz 1xm)
+	void add_row(const matrix&); // throw (string);
+};
+
+matrix operator+(const matrix&, const matrix&); // throw (string);
+matrix operator-(const matrix&, const matrix&); // throw (string);
+matrix operator*(const matrix&, const matrix&); // throw (string);
+matrix operator/(const matrix&, const matrix&); // throw (string);
+/// Macierz przeciwna.
+matrix operator-(const matrix&);
+/// Operatory relacji działają tylko dla macierzy 1x1!
+bool operator<(const matrix&, const matrix&); // throw (string);
+/// Operatory relacji działają tylko dla macierzy 1x1!
+bool operator>(const matrix&, const matrix&); // throw (string);
+/// Operatory relacji działają tylko dla macierzy 1x1!
+bool operator<=(const matrix&, const matrix&); // throw (string);
+/// Operatory relacji działają tylko dla macierzy 1x1!
+///
+/// @throw string
+bool operator>=(const matrix&, const matrix&); // throw (string);
+/// Operatory relacji działają tylko dla macierzy 1x1!
+bool operator==(const matrix&, const matrix&); // throw (string);
+/// Operatory relacji działają tylko dla macierzy 1x1!
+bool operator!=(const matrix&, const matrix&); // throw (string);
+/// Tworzy macierz jednostkową NxN.
+matrix ident_mat(int = 1); // throw (string);
+/// Tworzy macierz NxM i wypełnia wartościami losowymi
+/// z przedziału [0,1] o rozkładzie jednostajnym.
+matrix rand_mat(int = 1, int = 1); // throw (string);
+/// Tworzy macierz NxM i wypełnia wartościami losowymi
+/// o standardowym rozkładzie normalnym.
+matrix randn_mat(int = 1, int = 1); // throw (string);
+/// Zamiana macierzy 1x1 na `double`.
+double m2d(const matrix&); // throw (string);
+/// Wyznacznik macierzy.
+double det(const matrix&); // throw (string);
+/// Macierz odwrotna.
+matrix inv(const matrix&); // throw (string);
+/// Macierz transponowana (LGBT puns intended).
+matrix trans(const matrix&);
+/// Podnosi macierz do potęgi.
+matrix pow(const matrix&, int = 2); // throw (string);
+/// Oblicza normę z wektora pionowego (macierzy Nx1).
+double norm(const matrix&); // throw (string);
+/// Poziome połączenie dwóch macierzy.
+matrix hcat(const matrix&, const matrix&); // throw (string);
+/// Pionowe połączenie dwóch macierzy.
+matrix vcat(const matrix&, const matrix&); // throw (string);
+/// Zwraca wskazaną kolumnę macierzy w postaci wektora pionowego
+/// (macierzy Nx1).
+matrix get_col(const matrix&, int); // throw (string);
+/// Zwraca wskazany wiersz macierzy w postaci wektora poziomego
+/// (macierzy 1xM).
+matrix get_row(const matrix&, int); // throw (string);
+/// Wypisanie macierzy na ekran lub do pliku csv.
+///
+/// Podczas wypisywani elementów macierzy, część całkowita
+/// oddzielona jest od części ułamkowej za pomocą zdefiniowanego
+/// w linii 13 `SEP_SYMBOL`.
+///
+/// @param os strumień wyjściowy
+/// @param m macierz do wypisania
+/// @return referencja do strumienia wyjściowego
+ostream& operator<<(ostream& os, const matrix&);
+/// Odczyt macierzy z pliku csv, txt lub klawiatury.
+///
+/// Podając elementy macierzy należy pamiętać, że każda liczba
+/// musi kończyć się znakiem `;`. Podczas wprowadzania elementów
+/// macierzy, część całkowita może być oddzielona od części ułamkowej
+/// za pomocą zdefiniowanego w linii 13 `SEP_SYMBOL` lub " ".
+istream& operator>>(istream&, matrix&); // throw (string);
+
+
+================================================================================
+FILE: include/ode_solver.h
+================================================================================
+
+// include/ode_solver.h
+//Ten plik nie powinien być edytowany
+
+#pragma once
+
+#include"matrix.h"
+#include"user_funs.h"
+
+/// Rozwiązuje równanie różniczkowe metodą Rungego-Kutty.
+///
+/// @param diff równanie różniczkowe
+/// @param t0 poczatkowy czas
+/// @param dt krok czasowy
+/// @param tend koncowy czas
+/// @param Y0 poczatkowe warunki brzegowe
+/// @param ud1 dane użytkownika 1
+/// @param ud2 dane użytkownika 2
+matrix* solve_ode(matrix(*diff)(double, matrix, matrix, matrix), double t0, double dt, double tend, matrix Y0, matrix ud1, matrix ud2); // throw (string);
+
+
+================================================================================
+FILE: include/opt_alg.h
+================================================================================
+
+// include/opt_alg.h
+//Ten plik ~~nie~~ powinien być edytowany
+//
+// ^Akurat powinien, bo trzeba dodać dokumentację interfejsu,
+// obecnie jest wygenerowana przez AI i za dokładność
+// nie odpowiadam. Może się uzupełni na podstawie info z
+// poprzednich lat czy coś.
+//
+// PS: Monte Carlo wzięte z pliku cpp, więc się powinno zgadzać,
+// reszta XD że nam kazali implementować to na stałej liczbie
+// argumentów bez wyjaśnienia, co one robią.
+//
+// --- Dawid P.
+
+#pragma once
+
+#include"solution.h"
+
+/// Metoda Monte Carlo
+///
+/// @param ff Funkcja celu
+/// @param N Liczba zmiennych funkcji celu
+/// @param lb Dolne ograniczenie
+/// @param ub Górne ograniczenie
+/// @param epsilon Zakładana dokładność rozwiązania
+/// @param Nmax Maksymalna liczba wywołań funkcji celu
+/// @param ud1 Dane użytkownika 1
+/// @param ud2 Dane użytkownika 2
+solution MC(matrix(*ff)(matrix, matrix, matrix), int N, matrix lb, matrix ub, double epsilon, int Nmax, matrix ud1 = NAN, matrix ud2 = NAN);
+
+/// Metoda rozszerzenia
+///
+/// @param ff Funkcja celu
+/// @param x0 Początkowa wartość
+/// @param d Kierunek
+/// @param alpha Parametr
+/// @param Nmax Maksymalna liczba wywołań funkcji celu
+/// @param ud1 Dane użytkownika 1
+/// @param ud2 Dane użytkownika 2
+double* expansion(matrix(*ff)(matrix, matrix, matrix), double x0, double d, double alpha, int Nmax, matrix ud1 = NAN, matrix ud2 = NAN); // throw (string);
+
+/// Metoda Fibonacciego
+///
+/// @param ff Funkcja celu
+/// @param a Lewa granica przedziału
+/// @param b Prawa granica przedziału
+/// @param epsilon Zakładana dokładność rozwiązania
+/// @param ud1 Dane użytkownika 1
+/// @param ud2 Dane użytkownika 2
+solution fib(matrix(*ff)(matrix, matrix, matrix), double a, double b, double epsilon, matrix ud1 = NAN, matrix ud2 = NAN); // throw (string);
+
+/// Metoda lagrangego
+///
+/// @param ff Funkcja celu
+/// @param a Lewa granica przedziału
+/// @param b Prawa granica przedziału
+/// @param epsilon Zakładana dokładność rozwiązania
+/// @param gamma Współczynnik kroku
+/// @param Nmax Maksymalna liczba wywołań funkcji celu
+/// @param ud1 Dane użytkownika 1
+/// @param ud2 Dane użytkownika 2
+solution lag(matrix(*ff)(matrix, matrix, matrix), double a, double b, double epsilon, double gamma, int Nmax, matrix ud1 = NAN, matrix ud2 = NAN); // throw (string);
+
+/// Metoda Hooke-Jeevesa
+///
+/// @param ff Funkcja celu
+/// @param x0 Początkowy punkt
+/// @param s Współczynnik kroku
+/// @param alpha Współczynnik zmiany kroku
+/// @param epsilon Zakładana dokładność rozwiązania
+/// @param Nmax Maksymalna liczba wywołań funkcji celu
+/// @param ud1 Dane użytkownika 1
+/// @param ud2 Dane użytkownika 2
+solution HJ(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alpha, double epsilon, int Nmax, matrix ud1 = NAN, matrix ud2 = NAN); // throw (string);
+
+/// Metoda Hestenesa-Johnsona z próbą kroku
+///
+/// @param ff Funkcja celu
+/// @param XB Rozwiązanie początkowe
+/// @param s Współczynnik kroku
+/// @param ud1 Dane użytkownika 1
+/// @param ud2 Dane użytkownika 2
+solution HJ_trial(matrix(*ff)(matrix, matrix, matrix), solution XB, double s, matrix ud1 = NAN, matrix ud2 = NAN); // throw (string);
+
+/// Metoda Rosenbrocka
+///
+/// @param ff Funkcja celu
+/// @param x0 Rozwiązanie początkowe
+/// @param s0 Współczynnik kroku
+/// @param alpha Współczynnik kroku
+/// @param beta Współczynnik kroku
+/// @param epsilon Współczynnik kroku
+/// @param Nmax Współczynnik kroku
+/// @param ud1 Dane użytkownika 1
+/// @param ud2 Dane użytkownika 2
+solution Rosen(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double alpha, double beta, double epsilon, int Nmax, matrix ud1 = NAN, matrix ud2 = NAN); // throw (string);
+
+/// Metoda Newtona-Penaltyego
+///
+/// @param ff Funkcja celu
+/// @param x0 Początkowy wektor
+/// @param c Współczynnik kroku
+/// @param dc Współczynnik kroku
+/// @param epsilon Współczynnik kroku
+/// @param Nmax Współczynnik kroku
+/// @param ud1 Dane użytkownika 1
+/// @param ud2 Dane użytkownika 2
+solution pen(matrix(*ff)(matrix, matrix, matrix), matrix x0, double c, double dc, double epsilon, int Nmax, matrix ud1 = NAN, matrix ud2 = NAN); // throw (string);
+
+/// Metoda symetryczna Newtona-Morego
+///
+/// @param ff Funkcja celu
+/// @param x0 Początkowy wektor
+/// @param s Współczynnik kroku
+/// @param alpha Współczynnik kroku
+/// @param beta Współczynnik kroku
+/// @param gamma Współczynnik kroku
+/// @param delta Współczynnik kroku
+/// @param epsilon Zakładana dokładność rozwiazania
+/// @param Nmax Maksymalna liczba wywołań funkcji celu
+/// @param ud1 Dane użytkownika 1
+/// @param ud2 Dane użytkownika 2
+solution sym_NM(matrix(*ff)(matrix, matrix, matrix), matrix x0, double s, double alpha, double beta, double gamma, double delta, double epsilon, int Nmax, matrix ud1 = NAN, matrix ud2 = NAN); // throw (string);
+
+/// Metoda Steepest Descent
+///
+/// @param ff Funkcja celu
+/// @param gf Funkcja gradientu
+/// @param x0 Początkowy wektor
+/// @param h0 Współczynnik kroku
+/// @param epsilon Zakładana dokładność rozwiazania
+/// @param Nmax Maksymalna liczba wywołań funkcji celu
+/// @param ud1 Dane użytkownika 1
+/// @param ud2 Dane użytkownika 2
+solution SD(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, matrix), matrix x0, double h0, double epsilon, int Nmax, matrix ud1 = NAN, matrix ud2 = NAN); // throw (string);
+
+/// Metoda Conjugate Gradient
+///
+/// @param ff Funkcja celu
+/// @param gf Funkcja gradientu
+/// @param x0 Początkowy wektor
+/// @param h0 Współczynnik kroku
+/// @param epsilon Zakładana dokładność rozwiazania
+/// @param Nmax Maksymalna liczba wywołań funkcji celu
+/// @param ud1 Dane użytkownika 1
+/// @param ud2 Dane użytkownika 2
+solution CG(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, matrix), matrix x0, double h0, double epsilon, int Nmax, matrix ud1 = NAN, matrix ud2 = NAN); // throw (string);
+
+/// Metoda Newtona
+///
+/// @param ff Funkcja celu
+/// @param gf Funkcja gradientu
+/// @param Hf Funkcja hessa
+/// @param x0 Początkowy wektor
+/// @param h0 Współczynnik kroku
+/// @param epsilon Zakładana dokładność rozwiazania
+/// @param Nmax Maksymalna liczba wywołań funkcji celu
+/// @param ud1 Dane użytkownika 1
+/// @param ud2 Dane użytkownika 2
+solution Newton(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, matrix), matrix(*Hf)(matrix, matrix, matrix), matrix x0, double h0, double epsilon, int Nmax, matrix ud1 = NAN, matrix ud2 = NAN); // throw (string);
+
+/// Metoda Golden
+///
+/// @param ff Funkcja celu
+/// @param a Lewa granica przedziału
+/// @param b Prawa granica przedziału
+/// @param epsilon Zakładana dokładność rozwiazania
+/// @param Nmax Maksymalna liczba wywołań funkcji celu
+/// @param ud1 Dane użytkownika 1
+/// @param ud2 Dane użytkownika 2
+solution golden(matrix(*ff)(matrix, matrix, matrix), double a, double b, double epsilon, int Nmax, matrix ud1 = NAN, matrix ud2 = NAN); // throw (string);
+
+/// Metoda Powell'a
+///
+/// @param ff Funkcja celu
+/// @param x0 Początkowy wektor
+/// @param epsilon Zakładana dokładność rozwiazania
+/// @param Nmax Maksymalna liczba iteracji
+/// @param ud1 Dane użytkownika 1
+/// @param ud2 Dane użytkownika 2
+solution Powell(matrix(*ff)(matrix, matrix, matrix), matrix x0, double epsilon, int Nmax, matrix ud1 = NAN, matrix ud2 = NAN); // throw (string);
+
+/// Metoda EA
+///
+/// @param ff Funkcja celu
+/// @param N Liczba populacji
+/// @param lb Dolne ograniczenie
+/// @param ub Górne ograniczenie
+/// @param mi Liczba rodziców
+/// @param lambda Liczba potomków
+/// @param sigma0 Wielkość początkowa
+/// @param epsilon Zakładana dokładność rozwiazania
+/// @param Nmax Maksymalna liczba iteracji
+/// @param ud1 Dane użytkownika 1
+/// @param ud2 Dane użytkownika 2
+solution EA(matrix(*ff)(matrix, matrix, matrix), int N, matrix lb, matrix ub, int mi, int lambda, matrix sigma0, double epsilon, int Nmax, matrix ud1 = NAN, matrix ud2 = NAN); // throw (string);
+
+
+std::string resolvePath(std::string filename);
+
+
+================================================================================
+FILE: include/solution.h
+================================================================================
+
+// include/solution.h
+//Ten plik nie powinien być edytowany
+
+#pragma once
+
+#include"ode_solver.h"
+
+/// Rozwiązanie (obiekt klasy solution)
+class solution
+{
+public:
+    /// Macierz (najczęściej nx1) zawierająca
+    /// współrzędne punktu stanowiące rozwiązanie
+	matrix x;
+	/// Macierz (najczęściej 1x1) zawierająca
+	/// wartość funkcji celu w punkcie x
+	matrix y;
+	/// Macierz nx1 zawierająca gradient funkcji
+	/// celu w punkcie x
+	matrix g;
+	/// Macierz nxn zawierająca hessjan funkcji
+	/// celu w punkcie x
+	matrix H;
+	/// Macierz do dyspozycji użytkownika
+	matrix ud;
+	/// Liczba całkowita zawierająca informację o
+	/// przyczynie zakończenia poszukiwania minimum
+	/// funkcji celu
+	int flag;
+	/// Zmienna statyczna zawierająca liczbę wywołań
+	/// funkcji celu
+	static int f_calls;
+	/// Zmienna statyczna zawierająca liczbę obliczeń
+	/// gradientu funkcji celu
+	static int g_calls;
+	/// Zmienna statyczna zawierająca liczbę obliczeń
+	/// hessjana funkcji celu
+	static int H_calls;
+	/// Funkcja zerująca zmienne `f_calls`, `g_calls`
+	/// oraz `H_calls`
+	static void clear_calls();
+	/// Tworzy rozwiązanie o podanej współrzędnej
+	solution(double = NAN);
+	/// Tworzy rozwiązanie o przesłanych współrzędnych
+	solution(const matrix&);
+	/// Tworzy rozwiązanie o przesłanych współrzędnych
+	///
+	/// @param n liczba wymiarów rozwiązania
+	/// @param M wskaźnik na tablicę wartości współrzędnych rozwiązania
+	///
+	/// @throw string wiadomość o błędzie
+	solution(int n, double *M); // throw (string);
+	/// Konstruktor kopiujący (macierz `ud` nie jest kopiowana
+	/// jeżeli w obiekcie wzorcowym `ud(0, 0)` ma wartość `NAN`)
+	solution(const solution&);
+	/// Operator przypisania (macierz `ud` nie jest przypisywana
+	/// jeżeli w obiekcie wzorcowym `ud(0, 0)` ma wartość `NAN`)
+	solution& operator=(const solution&);
+	/// Funkcja wyznacza wartość zmiennej `y`
+	/// poprzez wywołanie funkcji, której adres
+	/// jest pierwszym argumentem oraz zwiększa `f_calls`
+	///
+	/// @remarks
+	/// Dwa kolejne argumenty, `ud1` i `ud2`, przekazywane są
+	/// do `fit_fun` przez implementacje metod optymalizacji.
+	///
+	/// @throw string wiadomość o błędzie
+	matrix fit_fun(matrix(*)(matrix, matrix, matrix), matrix ud1 = NAN, matrix ud2 = NAN); // throw (string);
+	/// Funkcja wyznacza wartość zmiennej `g`
+	/// poprzez wywołanie funkcji, której adres
+	/// jest pierwszym argumentem oraz zwiększa `g_calls`
+	///
+	/// @remarks
+	/// Dwa kolejne argumenty, `ud1` i `ud2`, przekazywane są
+	/// do `fit_fun` przez implementacje metod optymalizacji.
+	///
+	/// @throw string wiadomość o błędzie
+	matrix grad(matrix(*)(matrix, matrix, matrix), matrix ud1 = NAN, matrix ud2 = NAN); // throw (string);
+	/// Funkcja wyznacza wartość zmiennej `H`
+	/// poprzez wywołanie funkcji, której adres
+	/// jest pierwszym argumentem oraz zwiększa `h_calls`
+	///
+	/// @remarks
+	/// Dwa kolejne argumenty, `ud1` i `ud2`, przekazywane są
+	/// do `fit_fun` przez implementacje metod optymalizacji.
+	///
+	/// @throw string wiadomość o błędzie
+	matrix hess(matrix(*)(matrix, matrix, matrix), matrix ud1 = NAN, matrix ud2 = NAN); // throw (string);
+};
+
+/// Funkcja zwraca długość wektora (macierzy nx1) `x`
+int get_dim(const solution&); // throw (string);
+/// Wypisanie rozwiązania na ekran
+/// (wartości g_calls i H_calls są wypisywane tylko wtedy,
+/// gdy są większe od 0)
+ostream& operator<<(ostream&, const solution&);
+
+
+================================================================================
+FILE: include/user_funs.h
+================================================================================
+
+// include/user_funs.h
+// user_funs.h
+#pragma once
+
+#include"ode_solver.h"
+
+/// Funkcja celu dla przypadku testowego
+///
+/// @return matrix wektor wartości funkcji celu
+matrix ff0T(matrix, matrix = NAN, matrix = NAN);
+/// Funkcja celu dla problemu rzeczywistego
+///
+/// @return matrix wektor wartości funkcji celu
+matrix ff0R(matrix, matrix = NAN, matrix = NAN);
+/// Zwraca wektor pochodnych szukanych funkcji
+matrix df0(double, matrix, matrix = NAN, matrix = NAN);
+matrix ff1T(matrix x, matrix ud1, matrix ud2);
+matrix ff1R(matrix x, matrix ud1, matrix ud2);
+matrix dff1R(double t, matrix Y, matrix ud1, matrix ud2);
+matrix ff2T(matrix x, matrix ud1 = NAN, matrix ud2 = NAN);
+matrix ff2R(matrix x, matrix ud1 = NAN, matrix ud2 = NAN);
+matrix df2R(double t, matrix Y, matrix ud1 = NAN, matrix ud2 = NAN);
+matrix ff3T(matrix x, matrix ud1=NAN, matrix ud2=NAN);
+matrix ff3T_zew(matrix x, matrix ud1=NAN, matrix ud2=NAN);
+matrix ff3T_wew(matrix x, matrix ud1=NAN, matrix ud2=NAN);
+matrix dff3R(double t, matrix Y, matrix ud1=NAN, matrix ud2=NAN);
+matrix ff3R_zew(matrix x, matrix ud1=NAN, matrix ud2=NAN);
+
+// --- Funkcje Lab 4 ---
+// Testowa funkcja celu
+//
+
+matrix read_matrix_semicolon(string path, int rows, int cols)
+
+double calculate_accuracy(matrix theta, matrix X, matrix Y)
+
+matrix ff4T(matrix x, matrix ud1 = NAN, matrix ud2 = NAN);
+// Gradient testowej funkcji celu
+matrix gf4T(matrix x, matrix ud1 = NAN, matrix ud2 = NAN);
+// Hesjan testowej funkcji celu
+matrix Hf4T(matrix x, matrix ud1 = NAN, matrix ud2 = NAN);
+
+// Rzeczywista funkcja celu (Regresja logistyczna)
+matrix ff4R(matrix theta, matrix ud1, matrix ud2);
+// Gradient rzeczywistej funkcji celu
+matrix gf4R(matrix theta, matrix ud1, matrix ud2);
+// --- Funkcje Lab 5 ---
+
+/// Testowa funkcja celu (Ważona suma)
+/// ud1(0) = w (waga), ud2(0) = a (parametr)
+matrix ff5T(matrix x, matrix ud1, matrix ud2);
+
+/// Rzeczywista funkcja celu (Ważona suma z funkcją kary)
+/// ud1(0) = w (waga)
+matrix ff5R(matrix x, matrix ud1, matrix ud2);
+
+
+================================================================================
+FILE: src/main.cpp
+================================================================================
+
+// src/main.cpp
+
+
+#include "../include/opt_alg.h"
+#include "../include/user_funs.h"
+#include <cstdlib>
+#include <ctime>
+
+void lab0();
+void lab1();
+void lab1_real();
+void test_real_problem_DA50();
+void lab2();
+void lab3();
+void lab4();
+void lab5();
+void lab6();
+
+int main() {
+    try {
+
+        // Call the function for the test problem or the real problem
+        //lab1();
+        //test_real_problem_DA50();
+        //lab1_real();
+        //lab2();
+        //lab3();
+
+        lab4();
+    } catch (string EX_INFO) {
+        cerr << "ERROR:\n";
+        cerr << EX_INFO << endl << endl;
+    }
+    return 0;
+}
+
+void lab0() {
+    // Test function
+    double epsilon = 1e-2; // precision
+    int Nmax = 10000;      // maximum number of objective function calls
+    matrix lb(2, 1, -5), ub(2, 1, 5), // lower and upper bounds
+            a(2, 1);       // exact optimal solution
+    solution opt;          // optimal solution found by the algorithm
+    a(0) = -1;
+    a(1) = 2;
+    opt = MC(ff0T, 2, lb, ub, epsilon, Nmax, a); // call the optimization procedure
+    cout << opt << endl << endl;                // print the result
+    solution::clear_calls();                    // reset counters
+
+    // Pendulum
+    Nmax = 1000;
+    epsilon = 1e-5;
+    lb = 0, ub = 5;
+    double teta_opt = 1; // maximum pendulum deflection
+    opt = MC(ff0R, 1, lb, ub, epsilon, Nmax, teta_opt); // call the optimization procedure
+    cout << opt << endl << endl;                       // print the result
+    solution::clear_calls();                           // reset counters
+
+    // Save simulation to a CSV file
+    matrix Y0 = matrix(2, 1), // Y0 contains initial conditions
+            MT = matrix(2, new double[2]{m2d(opt.x), 0.5}); // MT contains the torque on the pendulum and its duration
+    matrix *Y = solve_ode(df0, 0, 0.1, 10, Y0, NAN, MT); // solve the differential equation
+    ofstream Sout(resolvePath("symulacja_lab0.csv"));                // define a stream to the .csv file
+    Sout << hcat(Y[0], Y[1]);                            // save results in the file
+    Sout.close();                                       // close the stream
+    delete[] Y;                                         // free the memory of the DE solution
+}
+
+void lab1() {
+    // Initialize the random number generator to get different values each time
+    srand(time(nullptr));
+
+    // Open a CSV file to save the results.
+    // The file will be created in the same folder as the executable.
+    ofstream file(resolvePath("lab1_results.csv"));
+
+    // Check if the file was opened correctly
+    if (!file.is_open()) {
+        cerr << "ERROR: Cannot open file lab1_results.csv for writing!" << endl;
+        return;
+    }
+
+    // Write the header to the CSV file
+    file << "Iteration,x0_start,"
+         << "Exp_start,Exp_end,Exp_f_calls,"
+         << "Fib_with_Exp_x,Fib_with_Exp_y,Fib_with_Exp_f_calls,"
+         << "Lag_with_Exp_x,Lag_with_Exp_y,Lag_with_Exp_f_calls,"
+         << "Fib_no_Exp_x,Fib_no_Exp_y,Fib_no_Exp_f_calls,"
+         << "Lag_no_Exp_x,Lag_no_Exp_y,Lag_no_Exp_f_calls\n";
+
+    // Define constant parameters
+    double d = 1.0;
+    double alpha = 1.7;
+    int Nmax = 200;
+    double epsilon = 1e-5;
+    double gamma = 1e-8;
+    double full_interval_a = -100.0;
+    double full_interval_b = 100.0;
+
+    // Main loop for 100 iterations
+    for (int i = 0; i < 1; ++i) {
+        cout << "Performing iteration no: " << i + 1 << "/100" << endl;
+
+        // 1. Draw a random starting point x0 from the interval [-100, 100]
+        double x0 = full_interval_a + (double) rand() / RAND_MAX * (full_interval_b - full_interval_a);
+
+        // Variables to store results from this iteration
+        double exp_start = NAN, exp_end = NAN;
+        int exp_calls = 0;
+        solution fib_exp_sol, lag_exp_sol, fib_full_sol, lag_full_sol;
+
+        // 2. Optimization using initial expansion
+        try {
+            solution::clear_calls();
+            double *interval = expansion(&ff1T, x0, d, alpha, Nmax);
+            exp_start = interval[0];
+            exp_end = interval[1];
+            exp_calls = solution::f_calls;
+
+            // Fibonacci on the narrowed interval
+            solution::clear_calls();
+            fib_exp_sol = fib(&ff1T, exp_start, exp_end, epsilon);
+            fib_exp_sol.ud = solution::f_calls; // Store the number of calls in the 'ud' field
+
+            // Lagrange on the narrowed interval
+            solution::clear_calls();
+            lag_exp_sol = lag(&ff1T, exp_start, exp_end, epsilon, gamma, Nmax);
+            lag_exp_sol.ud = solution::f_calls;
+
+            delete[] interval;
+        } catch (string &ex) {
+            // If expansion fails, save an error (NAN) and continue
+            cerr << "   Iteration " << i + 1 << ": Error in expansion step - " << ex << endl;
+        }
+
+        // 3. Optimization without expansion (on the full interval [-100, 100])
+        try {
+            // Fibonacci on the full interval
+            solution::clear_calls();
+            fib_full_sol = fib(&ff1T, full_interval_a, full_interval_b, epsilon);
+            fib_full_sol.ud = solution::f_calls;
+
+            // Lagrange on the full interval
+            solution::clear_calls();
+            lag_full_sol = lag(&ff1T, full_interval_a, full_interval_b, epsilon, gamma, Nmax);
+            lag_full_sol.ud = solution::f_calls;
+        } catch (string &ex) {
+            cerr << "   Iteration " << i + 1 << ": Error in full interval step - " << ex << endl;
+        }
+
+        // 4. Save all results from the iteration to the CSV file
+        file << i + 1 << "," << x0 << ","
+             << exp_start << "," << exp_end << "," << exp_calls << ","
+             << fib_exp_sol.x(0) << "," << fib_exp_sol.y(0) << "," << fib_exp_sol.ud(0) << ","
+             << lag_exp_sol.x(0) << "," << lag_exp_sol.y(0) << "," << lag_exp_sol.ud(0) << ","
+             << fib_full_sol.x(0) << "," << fib_full_sol.y(0) << "," << fib_full_sol.ud(0) << ","
+             << lag_full_sol.x(0) << "," << lag_full_sol.y(0) << "," << lag_full_sol.ud(0) << "\n";
+    }
+
+    // Close the file
+    file.close();
+    cout << "\nFinished. Results have been saved to lab1_results.csv" << endl;
+}
+
+void lab1_real()
+{
+    // Optimization parameters
+    double epsilon = 1e-5;
+    double gamma = 1e-9;
+    int Nmax = 100;
+
+    // Search interval for DA [1, 100] cm^2
+    double a = 1.0;
+    double b = 100.0;
+
+    // --- Fibonacci Method ---
+    solution::clear_calls();
+    cout << "--- Fibonacci Method ---" << endl;
+    solution sol_fib = fib(&ff1R, a, b, epsilon);
+    cout << sol_fib << endl;
+
+    // --- Lagrange Method ---
+    solution::clear_calls();
+    cout << "\n--- Lagrange Method ---" << endl;
+    solution sol_lag = lag(&ff1R, a, b, epsilon, gamma, Nmax);
+    cout << sol_lag << endl;
+
+    // --- Simulation for the optimal DA from Fibonacci method ---
+    cout << "\n--- Simulation for optimal DA (Fibonacci) = " << sol_fib.x(0) << " cm^2 ---" << endl;
+
+    double DA_opt_fib = sol_fib.x(0) * 1e-4; // cm^2 -> m^2
+    matrix Y0(3, 1);
+    Y0(0) = 5.0;
+    Y0(1) = 1.0;
+    Y0(2) = 20.0;
+
+    matrix params_fib(1, 1);
+    params_fib(0) = DA_opt_fib;
+
+    matrix* Y_fib = solve_ode(dff1R, 0, 1, 2000, Y0, NAN, params_fib);
+
+    // Save Fibonacci simulation results to a file
+    ofstream sim_file_fib(resolvePath("lab_1_real_fibonacci.csv"));
+    sim_file_fib << "t,VA,VB,TB\n";
+    for (int i = 0; i < get_len(Y_fib[0]); ++i)
+    {
+        sim_file_fib << Y_fib[0](i) << "," << Y_fib[1](i, 0) << "," << Y_fib[1](i, 1) << "," << Y_fib[1](i, 2) << "\n";
+    }
+    sim_file_fib.close();
+    cout << "Fibonacci simulation results saved to lab_1_real_fibonacci.csv" << endl;
+    delete[] Y_fib; // Free memory
+
+    //  Simulation for the optimal DA from Lagrange method ---
+    cout << "\n--- Simulation for optimal DA (Lagrange) = " << sol_lag.x(0) << " cm^2 ---" << endl;
+
+    double DA_opt_lag = sol_lag.x(0) * 1e-4; // cm^2 -> m^2
+
+    // Initial conditions are the same
+    // Y0(0) = 5.0;
+    // Y0(1) = 1.0;
+    // Y0(2) = 20.0;
+
+    matrix params_lag(1, 1);
+    params_lag(0) = DA_opt_lag;
+
+    matrix* Y_lag = solve_ode(dff1R, 0, 1, 2000, Y0, NAN, params_lag);
+
+    // Save Lagrange simulation results to a file
+    ofstream sim_file_lag(resolvePath("lab_1_real_lagrange.csv"));
+    sim_file_lag << "t,VA,VB,TB\n";
+    for (int i = 0; i < get_len(Y_lag[0]); ++i)
+    {
+        sim_file_lag << Y_lag[0](i) << "," << Y_lag[1](i, 0) << "," << Y_lag[1](i, 1) << "," << Y_lag[1](i, 2) << "\n";
+    }
+    sim_file_lag.close();
+    cout << "Lagrange simulation results saved to lab_1_real_lagrange.csv" << endl;
+    delete[] Y_lag; // Free memory
+}
+
+void lab2() {
+
+    srand(time(nullptr));
+
+
+    ofstream file(resolvePath("lab2_results.csv"));
+    if (!file.is_open()) {
+        cerr << "ERROR: Nie mozna otworzyc pliku lab2_results.csv do zapisu!" << endl;
+        return;
+    }
+
+
+    file << "Iteracja,Krok_startowy,x0_start,x1_start,"
+         << "HJ_x0_end,HJ_x1_end,HJ_y_end,HJ_f_calls,"
+         << "Rosen_x0_end,Rosen_x1_end,Rosen_y_end,Rosen_f_calls\n";
+
+
+
+    double epsilon = 1e-5;
+    int Nmax = 20000;
+
+
+    double alpha_hj = 0.5;
+
+
+    matrix s0_rosen(2, 1);
+    s0_rosen(0) = 0.5;
+    s0_rosen(1) = 0.5;
+    double alpha_rosen = 2.0;
+    double beta_rosen = 0.5;
+
+
+    vector<double> kroki_startowe = {0.5, 0.25, 0.1};
+
+    int global_iteration_count = 1;
+
+
+    for (double start_s : kroki_startowe) {
+        cout << "--- Rozpoczynam testy dla kroku startowego s = " << start_s << " ---" << endl;
+
+
+        for (int i = 0; i < 100; ++i) {
+            cout << "   Wykonuje iteracje nr: " << i + 1 << "/100" << endl;
+
+
+            matrix x0(2, 1);
+            x0(0) = -1.0 + (double)rand() / RAND_MAX * 2.0;
+            x0(1) = -1.0 + (double)rand() / RAND_MAX * 2.0;
+
+            solution sol_hj, sol_rosen;
+            int hj_calls = 0, rosen_calls = 0;
+
+
+            try {
+                solution::clear_calls();
+                sol_hj = HJ(&ff2T, x0, start_s, alpha_hj, epsilon, Nmax);
+                hj_calls = solution::f_calls;
+            } catch (const string& ex) {
+                cerr << "   Blad w metodzie Hooke-Jeevesa: " << ex << endl;
+
+            }
+
+
+            try {
+                solution::clear_calls();
+                sol_rosen = Rosen(&ff2T, x0, s0_rosen, alpha_rosen, beta_rosen, epsilon, Nmax);
+                rosen_calls = solution::f_calls;
+            } catch (const string& ex) {
+                cerr << "   Blad w metodzie Rosenbrocka: " << ex << endl;
+            }
+
+
+            file << global_iteration_count++ << "," << start_s << ","
+                 << x0(0) << "," << x0(1) << ","
+                 << sol_hj.x(0) << "," << sol_hj.x(1) << "," << sol_hj.y(0) << "," << hj_calls << ","
+                 << sol_rosen.x(0) << "," << sol_rosen.x(1) << "," << sol_rosen.y(0) << "," << rosen_calls << "\n";
+        }
+    }
+
+
+    file.close();
+    cout << "\nZakonczono. Wyniki zostaly zapisane do pliku lab2_results.csv" << endl;
+    // --- Zadanie 5b: Problem rzeczywisty ---
+    cout << "--- Laboratorium 2: Optymalizacja dla problemu rzeczywistego ---" << endl;
+
+    ofstream real_problem_file(resolvePath("lab2_real_problem_results.csv"));
+    if (!real_problem_file.is_open()) {
+        cerr << "ERROR: Nie mozna otworzyc pliku lab2_real_problem_results.csv do zapisu!" << endl;
+    } else {
+        real_problem_file << "Dlugosc_kroku,HJ_k1,HJ_k2,HJ_Q,HJ_f_calls,Rosen_k1,Rosen_k2,Rosen_Q,Rosen_f_calls\n";
+    }
+
+    // Inicjalizacja generatora liczb losowych
+    srand(time(nullptr));
+
+    // Parametry optymalizacji
+
+    // Przedział poszukiwań punktu startowego dla k1 i k2
+    double k_min = 0.0;
+    double k_max = 20.0;
+
+    // Wygenerowanie pojedynczego losowego punktu startowego x0 = [k1, k2]
+    matrix x0(2, 1);
+    x0(0) = k_min + (double)rand() / RAND_MAX * (k_max - k_min);
+    x0(1) = k_min + (double)rand() / RAND_MAX * (k_max - k_min);
+
+    cout << "Losowy punkt startowy (k1, k2): (" << x0(0) << ", " << x0(1) << ")" << endl << endl;
+
+    vector<double> step_sizes = { 5.0, 2.0, 1.0, 0.5, 0.1 };
+
+    for (double current_step : step_sizes) {
+        cout << "--- Testowanie dla kroku startowego: " << current_step << " ---" << endl;
+
+        solution sol_hj, sol_rosen;
+        int hj_calls = 0, rosen_calls = 0;
+
+        // --- Metoda Hooke'a-Jeevesa ---
+        try {
+            solution::clear_calls();
+            sol_hj = HJ(&ff2R, x0, current_step, alpha_hj, epsilon, Nmax);
+            hj_calls = solution::f_calls;
+            cout << "Optymalizacja metoda Hooke'a-Jeevesa zakonczona." << endl;
+            cout << sol_hj << endl;
+        } catch (const string& ex) {
+            cerr << "Blad w metodzie Hooke'a-Jeevesa: " << ex << endl;
+        }
+
+        // --- Metoda Rosenbrocka ---
+        matrix s0_rosen_loop(2, 1);
+        s0_rosen_loop(0) = current_step;
+        s0_rosen_loop(1) = current_step;
+        try {
+            solution::clear_calls();
+            sol_rosen = Rosen(&ff2R, x0, s0_rosen_loop, alpha_rosen, beta_rosen, epsilon, Nmax);
+            rosen_calls = solution::f_calls;
+            cout << "Optymalizacja metoda Rosenbrocka zakonczona." << endl;
+            cout << sol_rosen << endl;
+        } catch (const string& ex) {
+            cerr << "Blad w metodzie Rosenbrocka: " << ex << endl;
+        }
+
+        if (real_problem_file.is_open()) {
+            real_problem_file << current_step << ","
+                              << sol_hj.x(0) << "," << sol_hj.x(1) << "," << sol_hj.y(0) << "," << hj_calls << ","
+                              << sol_rosen.x(0) << "," << sol_rosen.x(1) << "," << sol_rosen.y(0) << "," << rosen_calls << "\n";
+        }
+
+        // This part is for generating data for the second table
+        if (current_step == 0.5) { // Run simulation only for one representative step size
+            // --- Symulacja i zapis do pliku dla optymalnych parametrów z metody Hooke'a-Jeevesa ---
+            cout << "--- Przeprowadzanie symulacji dla optymalnych parametrow z Hooke-Jeeves (krok=" << current_step << ") ---" << endl;
+            if (sol_hj.flag > 0) { // Sprawdzenie, czy metoda HJ znalazła rozwiązanie
+                double k1_opt = sol_hj.x(0);
+                double k2_opt = sol_hj.x(1);
+                cout << "Parametry optymalne: k1 = " << k1_opt << ", k2 = " << k2_opt << endl;
+
+                matrix Y0(2, 1); Y0(0) = 0.0; Y0(1) = 0.0;
+                matrix ode_params(2, 1); ode_params(0) = k1_opt; ode_params(1) = k2_opt;
+
+                matrix* Y = solve_ode(df2R, 0.0, 0.1, 100.0, Y0, NAN, ode_params);
+
+                ofstream sim_file(resolvePath("lab2_real_simulation_HJ.csv"));
+                if (sim_file.is_open()) {
+                    sim_file << "t,alpha,omega\n";
+                    int num_steps = get_len(Y[0]);
+                    for (int i = 0; i < num_steps; ++i) {
+                        sim_file << Y[0](i) << "," << Y[1](i, 0) << "," << Y[1](i, 1) << "\n";
+                    }
+                    sim_file.close();
+                    cout << "Wyniki symulacji zostaly zapisane do pliku lab2_real_simulation_HJ.csv" << endl << endl;
+                } else {
+                    cerr << "BLAD: Nie mozna otworzyc pliku lab2_real_simulation_HJ.csv do zapisu!" << endl;
+                }
+                delete[] Y;
+            } else {
+                cout << "Pominieto symulacje, poniewaz metoda Hooke-Jeevesa nie zwrocila poprawnego rozwiazania." << endl << endl;
+            }
+
+            // --- Symulacja i zapis do pliku dla optymalnych parametrów z metody Rosenbrocka ---
+            cout << "--- Przeprowadzanie symulacji dla optymalnych parametrow z Rosenbrocka (krok=" << current_step << ") ---" << endl;
+            if (sol_rosen.flag > 0) { // Sprawdzenie, czy metoda Rosenbrocka znalazła rozwiązanie
+                double k1_opt = sol_rosen.x(0);
+                double k2_opt = sol_rosen.x(1);
+                cout << "Parametry optymalne: k1 = " << k1_opt << ", k2 = " << k2_opt << endl;
+
+                matrix Y0(2, 1); Y0(0) = 0.0; Y0(1) = 0.0;
+                matrix ode_params(2, 1); ode_params(0) = k1_opt; ode_params(1) = k2_opt;
+
+                matrix* Y = solve_ode(df2R, 0.0, 0.1, 100.0, Y0, NAN, ode_params);
+
+                ofstream sim_file(resolvePath("lab2_real_simulation_Rosenbrock.csv"));
+                if (sim_file.is_open()) {
+                    sim_file << "t,alpha,omega\n";
+                    int num_steps = get_len(Y[0]);
+                    for (int i = 0; i < num_steps; ++i) {
+                        sim_file << Y[0](i) << "," << Y[1](i, 0) << "," << Y[1](i, 1) << "\n";
+                    }
+                    sim_file.close();
+                    cout << "Wyniki symulacji zostaly zapisane do pliku lab2_real_simulation_Rosenbrock.csv" << endl << endl;
+                } else {
+                    cerr << "BLAD: Nie mozna otworzyc pliku lab2_real_simulation_Rosenbrock.csv do zapisu!" << endl;
+                }
+                delete[] Y;
+            } else {
+                cout << "Pominieto symulacje, poniewaz metoda Rosenbrocka nie zwrocila poprawnego rozwiazania." << endl << endl;
+            }
+        }
+    }
+    if (real_problem_file.is_open()) {
+        real_problem_file.close();
+        cout << "\nZakonczono testy dla problemu rzeczywistego. Wyniki zostaly zapisane do pliku lab2_real_problem_results.csv" << endl;
+    }
+}
+
+void lab3() {
+    srand(time(nullptr));
+
+    // Otwarcie pliku do zapisu wyników
+    ofstream file(resolvePath("lab3_results.csv"));
+    if (!file.is_open()) {
+        cerr << "Błąd: Nie można otworzyć pliku lab3_results.csv" << endl;
+        return;
+    }
+    file << "Metoda,Parametr_a,Iteracja,x0_start,x1_start,x0_end,x1_end,y_end,f_calls,r\n";
+
+    // Parametry dla metody Neldera-Meada
+    double s = 0.5;       // Długość boku sympleksu
+    double alpha = 1.0;   // Odbicie
+    double beta = 0.5;    // Zawężenie
+    double gamma = 2.0;   // Ekspansja
+    double delta = 0.5;   // Redukcja
+    double epsilon_nm = 1e-3; // Dokładność
+    int Nmax = 10000;     // Maksymalna liczba wywołań funkcji celu
+
+    // Parametry dla pętli metody kar
+    double c_start = 1.0;
+    double dc = 5.0;      // Współczynnik skalowania kary
+    double epsilon_pen = 1e-4; // Warunek stopu dla pętli kar
+    int max_iter_pen = 20;
+
+    vector<double> a_params = {4.0, 4.4934, 5.0};;
+    int N_opt = 100;
+
+    for (double a : a_params) {
+        cout << "--- Testowanie dla a = " << a << " ---" << endl;
+
+        // --- ZEWNĘTRZNA FUNKCJA KARY ---
+        cout << "  Metoda kary zewnętrznej..." << endl;
+        for (int i = 0; i < N_opt; ++i) {
+            solution::clear_calls();
+
+            // Losowy punkt startowy z całego obszaru [-a, a] x [-a, a]
+            matrix x0(2, 1);
+            x0(0) = -a + (double)rand() / RAND_MAX * (2 * a);
+            x0(1) = -a + (double)rand() / RAND_MAX * (2 * a);
+
+            matrix x_prev = x0;
+            double c = c_start;
+            solution sol;
+
+            for (int k = 0; k < max_iter_pen; ++k) {
+                matrix ud(2, 1);
+                ud(0) = a;
+                ud(1) = c;
+
+                sol = sym_NM(ff3T_zew, x_prev, s, alpha, beta, gamma, delta, epsilon_nm, Nmax - solution::f_calls, ud);
+
+                if (norm(sol.x - x_prev) < epsilon_pen || solution::f_calls >= Nmax) {
+                    break;
+                }
+                x_prev = sol.x;
+                c *= dc;
+            }
+
+            double final_y = m2d(ff3T(sol.x));
+            double r = m2d(norm(sol.x));
+
+            file << "Zewnetrzna," << a << "," << i + 1 << ","
+                 << x0(0) << "," << x0(1) << ","
+                 << sol.x(0) << "," << sol.x(1) << "," << final_y << ","
+                 << solution::f_calls << "," << r << "\n";
+        }
+
+        // --- WEWNĘTRZNA FUNKCJA KARY ---
+        cout << "  Metoda kary wewnętrznej..." << endl;
+        for (int i = 0; i < N_opt; ++i) {
+            solution::clear_calls();
+
+            // Losowy punkt startowy ze ściśle dopuszczalnego obszaru
+            matrix x0(2, 1);
+            do {
+                x0(0) = 1.001 + (double)rand() / RAND_MAX * (a - 1.002);
+                x0(1) = 1.001 + (double)rand() / RAND_MAX * (a - 1.002);
+            } while (sqrt(pow(x0(0), 2) + pow(x0(1), 2)) >= a - 0.001);
+
+            matrix x_prev = x0;
+            double c = 10.0; // Wyższy c0 dla metody wewn.
+            solution sol;
+
+            for (int k = 0; k < max_iter_pen; ++k) {
+                matrix ud(2, 1);
+                ud(0) = a;
+                ud(1) = c;
+
+                sol = sym_NM(ff3T_wew, x_prev, s, alpha, beta, gamma, delta, epsilon_nm, Nmax - solution::f_calls, ud);
+
+                if (norm(sol.x - x_prev) < epsilon_pen || solution::f_calls >= Nmax) {
+                    break;
+                }
+                x_prev = sol.x;
+                c /= dc; // Zmniejszanie 'c' dla metody wewnętrznej
+            }
+
+            double final_y = m2d(ff3T(sol.x));
+            double r = m2d(norm(sol.x));
+
+            file << "Wewnetrzna," << a << "," << i + 1 << ","
+                 << x0(0) << "," << x0(1) << ","
+                 << sol.x(0) << "," << sol.x(1) << "," << final_y << ","
+                 << solution::f_calls << "," << r << "\n";
+        }
+    }
+
+    file.close();
+    cout << "\nZakończono. Wyniki zapisano do pliku lab3_results.csv" << endl;
+
+    cout << "\n\n--- Lab 3: Problem Rzeczywisty (Pilka) ---" << endl;
+
+        ofstream file_real(resolvePath("lab3_real_problem.csv"));
+        file_real << "Iteracja,c,v0x_opt,omega_opt,x_end,f_calls\n";
+
+        // Parametry Neldera-Meada
+         s = 0.5;
+         alpha = 1.0, beta = 0.5, gamma = 2.0, delta = 0.5;
+         epsilon_nm = 1e-6;
+         Nmax = 5000;
+
+        // Parametry metody kar
+        double c = 1.0;       // c startowe
+         dc = 2.0;      // Krok zwiększania kary (można dobrać np. 2 lub 5)
+         epsilon_pen = 1e-6;
+        int max_pen_iter = 20;
+
+        // Punkt startowy (losowy w dopuszczalnych granicach [-10, 10])
+        matrix x0(2, 1);
+        x0(0) = -10.0 + (double)rand() / RAND_MAX * 20.0; // v0x
+        x0(1) = -10.0 + (double)rand() / RAND_MAX * 20.0; // omega
+
+        cout << "Punkt startowy: v0x=" << x0(0) << ", omega=" << x0(1) << endl;
+
+        matrix x_prev = x0;
+        solution sol;
+
+        // Pętla metody kar zewnętrznych
+        for (int k = 0; k < max_pen_iter; ++k) {
+            solution::clear_calls();
+            matrix ud2(1, 1);
+            ud2(0) = c;
+
+            // Wywołanie NM dla funkcji z karą
+            // Uwaga: ff3R_zew nie używa ud1, więc dajemy NAN, parametry kary idą w ud2
+            sol = sym_NM(ff3R_zew, x_prev, s, alpha, beta, gamma, delta, epsilon_nm, Nmax, NAN, ud2);
+
+            // Obliczamy rzeczywistą wartość x_end (bez kary) dla logów
+            // Wywołujemy ff3R_zew z c=0, żeby dostać czystą wartość funkcji celu (-x_end)
+            matrix ud2_zero(1, 1); ud2_zero(0) = 0.0;
+            double real_obj = m2d(ff3R_zew(sol.x, NAN, ud2_zero));
+            double x_end_val = -real_obj; // Bo minimalizowaliśmy -x_end
+
+            cout << "Metoda kar it." << k+1 << " c=" << c
+                 << " v0x=" << sol.x(0) << " w=" << sol.x(1)
+                 << " x_end=" << x_end_val << endl;
+
+            file_real << k + 1 << "," << c << ","
+                      << sol.x(0) << "," << sol.x(1) << ","
+                      << x_end_val << "," << solution::f_calls << "\n";
+
+            // Warunek stopu (zmiana x jest mała)
+            if (norm(sol.x - x_prev) < epsilon_pen) {
+                cout << "Osiagnieto zbieznosc metody kar." << endl;
+                break;
+            }
+
+            x_prev = sol.x;
+            c *= dc;
+        }
+        file_real.close();
+
+        // --- Symulacja dla znalezionych optymalnych parametrów ---
+        cout << "Generowanie symulacji dla optymalnego rozwiazania..." << endl;
+
+        double opt_v0x = sol.x(0);
+        double opt_omega = sol.x(1);
+
+        matrix Y0(4, 1);
+        Y0(0) = 0.0; Y0(1) = opt_v0x; Y0(2) = 100.0; Y0(3) = 0.0;
+        matrix params(1, 1);
+        params(0) = opt_omega;
+
+        matrix* Y = solve_ode(dff3R, 0, 0.01, 7, Y0, params, NAN);
+
+        ofstream sim_file(resolvePath("lab3_real_simulation.csv"));
+        sim_file << "t,x,vx,y,vy\n";
+        int n = get_len(Y[0]);
+        for(int i=0; i<n; ++i) {
+            sim_file << Y[0](i) << ","
+                     << Y[1](i, 0) << "," << Y[1](i, 1) << ","
+                     << Y[1](i, 2) << "," << Y[1](i, 3) << "\n";
+        }
+        sim_file.close();
+        delete[] Y;
+
+        cout << "Zapisano wyniki symulacji do lab3_real_simulation.csv" << endl;
+}
+
+void lab4() {
+    srand(time(nullptr));
+
+    // ==========================================================
+    // CZĘŚĆ 1: FUNKCJA TESTOWA - Generowanie CSV pod Excel
+    // ==========================================================
+    cout << "Generowanie wynikow dla funkcji testowej..." << endl;
+
+    ofstream file(resolvePath("lab4_testowa_tabela.csv"));
+    if (!file.is_open()) {
+        cerr << "ERROR: Nie mozna otworzyc pliku lab4_testowa_tabela.csv" << endl;
+        return;
+    }
+
+    // Naglowek pasujacy do Twojego Excela (US locale - kropka jako separator)
+    // Uklad: Krok, Lp, x1(0), x2(0), [SD], [CG], [Newton]
+    file << "Dlugosc_kroku,Lp,x1_0,x2_0,"
+         // Metoda najszybszego spadku
+         << "SD_x1,SD_x2,SD_y,SD_f_calls,SD_g_calls,SD_Globalne,"
+         // Metoda gradientow sprzezonych
+         << "CG_x1,CG_x2,CG_y,CG_f_calls,CG_g_calls,CG_Globalne,"
+         // Metoda Newtona
+         << "Newt_x1,Newt_x2,Newt_y,Newt_f_calls,Newt_g_calls,Newt_H_calls,Newt_Globalne\n";
+
+    vector<double> steps = {0.05, 0.25, NAN}; // NAN = zmienny
+    int Nmax = 10000;
+    double epsilon = 1e-5;
+    double global_threshold = 1e-3; // Prog uznania za minimum globalne (0)
+
+    for (double h : steps) {
+        string step_label = isnan(h) ? "Zmienny" : to_string(h);
+
+        for (int i = 0; i < 100; ++i) {
+            // Punkt startowy losowy [-2, 2]
+            matrix x0(2, 1);
+            x0(0) = -2.0 + (double)rand() / RAND_MAX * 4.0;
+            x0(1) = -2.0 + (double)rand() / RAND_MAX * 4.0;
+
+            // --- 1. SD (Najszybszy Spadek) ---
+            solution::clear_calls();
+            solution sol_sd = SD(ff4T, gf4T, x0, h, epsilon, Nmax);
+            string sd_glob = (abs(m2d(sol_sd.y)) < global_threshold) ? "TAK" : "NIE";
+
+            // --- 2. CG (Gradienty Sprzezone) ---
+            solution::clear_calls();
+            solution sol_cg = CG(ff4T, gf4T, x0, h, epsilon, Nmax);
+            string cg_glob = (abs(m2d(sol_cg.y)) < global_threshold) ? "TAK" : "NIE";
+
+            // --- 3. Newton ---
+            solution::clear_calls();
+            solution sol_newton = Newton(ff4T, gf4T, Hf4T, x0, h, epsilon, Nmax);
+            string newt_glob = (abs(m2d(sol_newton.y)) < global_threshold) ? "TAK" : "NIE";
+
+            // ZAPIS WIERSZA DO CSV
+            file << step_label << "," << (i + 1) << ","
+                 << x0(0) << "," << x0(1) << ","
+                 // SD Cols
+                 << sol_sd.x(0) << "," << sol_sd.x(1) << "," << sol_sd.y(0) << ","
+                 << solution::f_calls << "," << solution::g_calls << "," << sd_glob << ","
+                 // CG Cols
+                 << sol_cg.x(0) << "," << sol_cg.x(1) << "," << sol_cg.y(0) << ","
+                 << solution::f_calls << "," << solution::g_calls << "," << cg_glob << ","
+                 // Newton Cols
+                 << sol_newton.x(0) << "," << sol_newton.x(1) << "," << sol_newton.y(0) << ","
+                 << solution::f_calls << "," << solution::g_calls << "," << solution::H_calls << "," << newt_glob
+                 << "\n";
+        }
+    }
+    file.close();
+    cout << "Plik lab4_testowa_tabela.csv wygenerowany." << endl;
+
+    // ==========================================================
+    // CZĘŚĆ 2: PROBLEM RZECZYWISTY (XData, YData)
+    // ==========================================================
+    cout << "Przetwarzanie problemu rzeczywistego (LogReg)..." << endl;
+
+    ofstream file_real(resolvePath("lab4_rzeczywisty_wyniki.csv"));
+    file_real << "Krok,Theta0,Theta1,Theta2,f_min,f_calls,Dokladnosc_%\n";
+
+    try {
+        // Wczytujemy Twoje specyficzne pliki (format z srednikami)
+        // XData ma 3 wiersze (Bias, Feature1, Feature2) i 100 kolumn
+        // YData ma 1 wiersz i 100 kolumn
+        matrix X = read_matrix_semicolon(resolvePath("XData.txt"), 3, 100);
+        matrix Y = read_matrix_semicolon(resolvePath("YData.txt"), 1, 100);
+
+        // Skalowanie danych (opcjonalne, ale pomaga przy duzych wartosciach jak 80-100)
+        // Tutaj zostawiamy surowe, bo takie dostales polecenie, ale to przyczyna bledow.
+
+        matrix theta0(3, 1, 0.0); // Start theta = [0, 0, 0]
+        vector<double> real_steps = {0.01, 0.001, 0.0001};
+
+        for (double h : real_steps) {
+            solution::clear_calls();
+
+            // Uzywamy CG (Gradienty Sprzezone) dla problemu rzeczywistego
+            solution sol = CG(ff4R, gf4R, theta0, h, epsilon, Nmax, X, Y);
+
+            double acc = calculate_accuracy(sol.x, X, Y);
+
+            file_real << h << ","
+                      << sol.x(0) << "," << sol.x(1) << "," << sol.x(2) << ","
+                      << sol.y(0) << "," << solution::f_calls << "," << acc << "\n";
+
+            cout << "Krok " << h << ": f_min=" << sol.y(0) << ", Acc=" << acc << "%" << endl;
+        }
+
+    } catch (string& ex) {
+        cerr << "BLAD w czesci rzeczywistej: " << ex << endl;
+        cerr << "Upewnij sie, ze pliki XData.txt i YData.txt sa w folderze z danymi." << endl;
+    }
+
+    file_real.close();
+}
+
+void lab5() {
+}
+
+void lab6() {
+}
+
+void test_real_problem_DA50()
+{
+    cout << "\n--- Running Test for DA = 50 cm^2 ---" << endl;
+
+    // 1. Define the fixed DA value (50 cm^2 -> m^2)
+    double DA_test = 50.0 * 1e-4;
+
+    // 2. Set initial conditions
+    matrix Y0(3, 1);
+    Y0(0) = 5.0;  // VA_start = 5 m^3
+    Y0(1) = 1.0;  // VB_start = 1 m^3
+    Y0(2) = 20.0; // TB_start = 20 C
+
+    // 3. Set the parameters for the ODE solver
+    matrix params(1, 1);
+    params(0) = DA_test;
+
+    // 4. Solve the ODE with a time step of 1 second
+    matrix* Y = solve_ode(dff1R, 0, 1, 2000, Y0, NAN, params);
+
+    // 5. Find the maximum temperature in tank B from the results
+    int n = get_len(Y[0]);
+    double T_max = 0;
+    for (int i = 0; i < n; ++i)
+    {
+        if (Y[1](i, 2) > T_max)
+        {
+            T_max = Y[1](i, 2);
+        }
+    }
+
+    // 6. Print the result
+    cout << "Simulation finished." << endl;
+    cout << "Maximum temperature in Tank B: " << T_max << " C" << endl;
+
+    // 7. Free the dynamically allocated memory
+    delete[] Y;
+}
+
+
+================================================================================
+FILE: src/matrix.cpp
+================================================================================
+
+// src/matrix.cpp
+//Ten plik nie powinien być edytowany
+
+#include"../include/matrix.h"
+
+matrix::matrix(double L)
+{
+	n = m = 1;
+	M = new double*[1];
+	M[0] = new double[1];
+	M[0][0] = L;
+}
+
+matrix::matrix(int nv, int mv, double L)
+{
+	if (nv <= 0 || mv <= 0)
+		throw string("matrix::matrix(int,int,double):\nwymiary macierzy musza byc dodatnie");
+	n = nv;
+	m = mv;
+	M = new double*[n];
+	for (int i = 0; i < n; ++i)
+	{
+		M[i] = new double[m];
+		for (int j = 0; j < m; ++j)
+			M[i][j] = L;
+	}
+}
+
+matrix::matrix(int nv, double* A)
+{
+	if (nv <= 0)
+		throw string("matrix::matrix(int,double*):\ndlugosc wektora musi byc dodatnia");
+	n = nv;
+	m = 1;
+	M = new double*[n];
+	for (int i = 0; i < n; ++i)
+	{
+		M[i] = new double[1];
+		M[i][0] = A[i];
+	}
+}
+
+matrix::matrix(int nv, int mv, double** A)
+{
+	if (nv <= 0 || mv <= 0)
+		throw string("matrix::matrix(int,int,double**):\nwymiary macierzy musza byc dodatnie");
+	n = nv;
+	m = mv;
+	M = new double*[n];
+	for (int i = 0; i < n; ++i)
+	{
+		M[i] = new double[m];
+		for (int j = 0; j < m; ++j)
+			M[i][j] = A[i][j];
+	}
+}
+
+matrix::matrix(const matrix& A)
+{
+	n = A.n;
+	m = A.m;
+	M = new double*[n];
+	for (int i = 0; i < n; ++i)
+	{
+		M[i] = new double[m];
+		for (int j = 0; j < m; ++j)
+			M[i][j] = A.M[i][j];
+	}
+}
+
+matrix::~matrix()
+{
+	for (int i = 0; i < n; ++i)
+		delete[] M[i];
+	delete[] M;
+}
+
+matrix& matrix::operator=(const matrix& A)
+{
+	if (&A == this)
+		return *this;
+	for (int i = 0; i < n; ++i)
+		delete[] M[i];
+	delete[] M;
+	n = A.n;
+	m = A.m;
+	M = new double*[n];
+	for (int i = 0; i < n; ++i)
+	{
+		M[i] = new double[m];
+		for (int j = 0; j < m; ++j)
+			M[i][j] = A.M[i][j];
+	}
+	return *this;
+}
+
+matrix matrix::operator[](int nv) const
+{
+	if (nv >= m || nv < 0)
+		throw string("matrix matrix::operator[](int nv) const:\nnumer kolmuny jest poza zakresem");
+	matrix A(n, 1);
+	for (int i = 0; i < n; ++i)
+		A.M[i][0] = M[i][nv];
+	return A;
+}
+
+double& matrix::operator()(int nv, int mv)
+{
+	if (nv >= n || mv >= m || nv < 0 || mv < 0)
+		throw string("double& matrix::operator()(int,int):\nindeks jest poza zakresem");
+	return M[nv][mv];
+}
+
+double matrix::operator()(int nv, int mv) const
+{
+	if (nv >= n || mv >= m || nv < 0 || mv < 0)
+		throw string("double matrix::operator()(int,int) const:\nindeks jest poza zakresem");
+	return M[nv][mv];
+}
+
+void matrix::set_col(const matrix& c, int mv)
+{
+	if (mv >= m || mv < 0)
+		throw string("void matrix::set_col(const matrix&,int):\nnumer kolmuny jest poza zakresem");
+	if (n != c.n)
+		throw string("void matrix::set_col(const matrix&,int):\nliczba wierszy macierzy musi byc rowna dlugosci wektora");
+	if (c.m != 1)
+		throw string("void matrix::set_col(const matrix&,int):\nwstawiana kolumna musi miec postac wektora pionowego");
+	for (int i = 0; i < n; ++i)
+		M[i][mv] = c(i);
+}
+
+void matrix::set_row(const matrix& c, int nv)
+{
+	if (nv >= n || nv < 0)
+		throw string("void matrix::set_row(const matrix&,int):\nnumer wiersza jest poza zakresem");
+	if (m != c.m)
+		throw string("void matrix::set_row(const matrix&,int):\nliczba kolumn macierzy musi byc rowna dlugosci wektora");
+	if (c.n != 1)
+		throw string("void matrix::set_row(const matrix&,int):\nwstawiany wiersz musi miec postac wektora poziomego");
+	for (int i = 0; i < m; ++i)
+		M[nv][i] = c(0, i);
+}
+
+void matrix::add_col(double L)
+{
+	matrix A(n, m + 1);
+	for (int i = 0; i < n; ++i)
+	{
+		for (int j = 0; j < m; ++j)
+			A(i, j) = M[i][j];
+		A(i, m) = L;
+	}
+	*this = A;
+}
+
+void matrix::add_row(double L)
+{
+	matrix A(n + 1, m);
+	for (int i = 0; i < n; ++i)
+		for (int j = 0; j < m; ++j)
+			A(i, j) = M[i][j];
+	for (int j = 0; j < m; ++j)
+		A(n, j) = L;
+	*this = A;
+}
+
+void matrix::add_col(const matrix& c)
+{
+	try
+	{
+		matrix A(n, m + 1);
+		for (int i = 0; i < n; ++i)
+		{
+			for (int j = 0; j < m; ++j)
+				A(i, j) = M[i][j];
+		}
+		A.set_col(c, m);
+		*this = A;
+	}
+	catch (string ex_info)
+	{
+		throw ("void matrix::add_col(const matrix&):\n" + ex_info);
+	}
+}
+
+void matrix::add_row(const matrix& c)
+{
+	try
+	{
+		matrix A(n + 1, m);
+		for (int i = 0; i < n; ++i)
+			for (int j = 0; j < m; ++j)
+				A(i, j) = M[i][j];
+		A.set_row(c, n);
+		*this = A;
+	}
+	catch (string ex_info)
+	{
+		throw ("void matrix::add_row(const matrix&):\n" + ex_info);
+	}
+}
+
+matrix operator+(const matrix& A, const matrix& B)
+{
+	int* nA = get_size(A);
+	int* nB = get_size(B);
+	if (nA[0] == 1 && nA[1] == 1)
+	{
+		matrix C(B);
+		for (int i = 0; i < nB[0]; ++i)
+			for (int j = 0; j < nB[1]; ++j)
+				C(i, j) += A();
+		return C;
+	}
+	else if (nB[0] == 1 && nB[1] == 1)
+	{
+		matrix C(A);
+		for (int i = 0; i < nA[0]; ++i)
+			for (int j = 0; j < nA[1]; ++j)
+				C(i, j) += B();
+		return C;
+	}
+	else if (nA[0] == nB[0] && nA[1] == nB[1])
+	{
+		matrix C(A);
+		for (int i = 0; i < nA[0]; ++i)
+			for (int j = 0; j < nA[1]; ++j)
+				C(i, j) += B(i, j);
+		return C;
+	}
+	else
+		throw string("matrix operator+(const matrix&, const matrix&):\nwymiary macierzy nie sa zgodne");
+}
+
+matrix operator-(const matrix& A, const matrix& B)
+{
+	try
+	{
+		return A + (-B);
+	}
+	catch (string ex_info)
+	{
+		throw ("matrix operator-(const matrix&, const matrix&):\n" + ex_info);
+	}
+}
+
+matrix operator*(const matrix& A, const matrix& B)
+{
+	int* nA = get_size(A);
+	int* nB = get_size(B);
+	if (nA[0] == 1 && nA[1] == 1)
+	{
+		matrix C(B);
+		for (int i = 0; i < nB[0]; ++i)
+			for (int j = 0; j < nB[1]; ++j)
+				C(i, j) *= A();
+		return C;
+	}
+	else if (nB[0] == 1 && nB[1] == 1)
+	{
+		matrix C(A);
+		for (int i = 0; i < nA[0]; ++i)
+			for (int j = 0; j < nA[1]; ++j)
+				C(i, j) *= B();
+		return C;
+	}
+	else if (nA[1] == nB[0])
+	{
+		matrix C(nA[0], nB[1]);
+		for (int i = 0; i < nA[0]; ++i)
+			for (int j = 0; j < nB[1]; ++j)
+				for (int k = 0; k < nA[1]; ++k)
+					C(i, j) += A(i, k) * B(k, j);
+		return C;
+	}
+	else
+		throw string("matrix operator*(const matrix&, const matrix&):\nwymiary macierzy nie sa zgodne");
+}
+
+matrix operator/(const matrix& A, const matrix& B)
+{
+	try
+	{
+		return A * inv(B);
+	}
+	catch (string ex_info)
+	{
+		throw ("matrix operator/(const matrix&, const matrix&):\n" + ex_info);
+	}
+}
+
+matrix operator-(const matrix& A)
+{
+	int* n = get_size(A);
+	matrix B(A);
+	for (int i = 0; i < n[0]; ++i)
+		for (int j = 0; j < n[1]; ++j)
+			B(i, j) = -A(i, j);
+	return B;
+}
+
+bool operator<(const matrix& A, const matrix& B)
+{
+	int* nA = get_size(A);
+	int* nB = get_size(B);
+	if (nA[0] != 1 || nA[1] != 1 || nB[0] != 1 || nB[1] != 1)
+		throw string("bool operator<(const matrix&, const matrix&):\noperator relacji jest zdefiniwany tylko dla macierzy 1x1");
+	return A() < B();
+}
+
+bool operator>(const matrix& A, const matrix& B)
+{
+	int* nA = get_size(A);
+	int* nB = get_size(B);
+	if (nA[0] != 1 || nA[1] != 1 || nB[0] != 1 || nB[1] != 1)
+		throw string("bool operator>(const matrix&, const matrix&):\noperator relacji jest zdefiniwany tylko dla macierzy 1x1");
+	return A() > B();
+}
+
+bool operator<=(const matrix& A, const matrix& B)
+{
+	int* nA = get_size(A);
+	int* nB = get_size(B);
+	if (nA[0] != 1 || nA[1] != 1 || nB[0] != 1 || nB[1] != 1)
+		throw string("bool operator<=(const matrix&, const matrix&):\noperator relacji jest zdefiniwany tylko dla macierzy 1x1");
+	return A() <= B();
+}
+
+bool operator>=(const matrix& A, const matrix& B)
+{
+	int* nA = get_size(A);
+	int* nB = get_size(B);
+	if (nA[0] != 1 || nA[1] != 1 || nB[0] != 1 || nB[1] != 1)
+		throw string("bool operator>=(const matrix&, const matrix&):\noperator relacji jest zdefiniwany tylko dla macierzy 1x1");
+	return A() >= B();
+}
+
+bool operator==(const matrix& A, const matrix& B)
+{
+	int* nA = get_size(A);
+	int* nB = get_size(B);
+	if (nA[0] != 1 || nA[1] != 1 || nB[0] != 1 || nB[1] != 1)
+		throw string("bool operator==(const matrix&, const matrix&):\noperator relacji jest zdefiniwany tylko dla macierzy 1x1");
+	return A() == B();
+}
+
+bool operator!=(const matrix& A, const matrix& B)
+{
+	int* nA = get_size(A);
+	int* nB = get_size(B);
+	if (nA[0] != 1 || nA[1] != 1 || nB[0] != 1 || nB[1] != 1)
+		throw string("bool operator!=(const matrix&, const matrix&):\noperator relacji jest zdefiniwany tylko dla macierzy 1x1");
+	return A() != B();
+}
+
+matrix ident_mat(int nv)
+{
+	try
+	{
+		matrix A(nv, nv);
+		for (int i = 0; i < nv; ++i)
+			A(i, i) = 1;
+		return A;
+	}
+	catch (string ex_info)
+	{
+		throw ("matrix ident_mat(int):\n" + ex_info);
+	}
+}
+
+matrix rand_mat(int nv, int mv)
+{
+	try
+	{
+		matrix A(nv, mv);
+		random_device R;
+		for (int i = 0; i < nv; ++i)
+			for (int j = 0; j < mv; ++j)
+				A(i, j) = 1.0 * R() / R.max();
+		return A;
+	}
+	catch (string ex_info)
+	{
+		throw ("matrix rand_mat(int,int):\n" + ex_info);
+	}
+}
+
+matrix randn_mat(int nv, int mv)
+{
+	try
+	{
+		matrix A(nv, mv);
+		random_device rd;
+		default_random_engine gen;
+		gen.seed(static_cast<unsigned int>(chrono::system_clock::now().time_since_epoch().count()));
+		normal_distribution<double> distr(0.0, 1.0);
+		for (int i = 0; i < nv; ++i)
+			for (int j = 0; j < mv; ++j)
+				A(i, j) = distr(gen);
+		return A;
+	}
+	catch (string ex_info)
+	{
+		throw ("matrix randn_mat(int,int):\n" + ex_info);
+	}
+}
+
+double m2d(const matrix& A)
+{
+	int* nA = get_size(A);
+	if (nA[0] != 1 || nA[1] != 1)
+		throw string("double m2d(const matrix&):\nzamiana macierzy na liczbe mozliwa jest tylko dla skalarow");
+	return A(0, 0);
+}
+
+double det(const matrix& A)
+{
+	int* nA = get_size(A);
+	if (nA[0] != nA[1])
+		throw string("double det(const matrix&):\nmacierz musi byc kwadratowa");
+	double D = 0;
+	if (nA[0] == 1)
+		D = A();
+	else
+	{
+		for (int k = 0; k < nA[0]; ++k)
+		{
+			matrix T(nA[0] - 1, nA[0] - 1);
+			for (int i = 0; i < nA[0] - 1; ++i)
+				for (int j = 0; j < nA[1] - 1; ++j)
+					T(i, j) = A(i + 1, j >= k ? j + 1 : j);
+			D = D + A(0, k) * pow(-1.0, k) * det(T);
+		}
+	}
+	return D;
+}
+
+matrix inv(const matrix& A)
+{
+	try
+	{
+		double D = det(A);
+		if (D == 0)
+			throw string("matrix inv(const matrix&):\nwyznacznik macierzy wynosi 0");
+		int* nA = get_size(A);
+		matrix I(nA[0], nA[0]);
+		if (nA[0] == 1)
+			I() = 1 / A();
+		else
+		{
+			for (int k = 0; k < nA[0]; ++k)
+				for (int l = 0; l < nA[1]; ++l)
+				{
+					matrix T(nA[0] - 1, nA[0] - 1);
+					for (int i = 0; i < nA[0] - 1; ++i)
+						for (int j = 0; j < nA[1] - 1; ++j)
+							T(i, j) = A(i >= k ? i + 1 : i, j >= l ? j + 1 : j);
+					I(k, l) = pow(-1.0, k + l) * det(T);
+				}
+			I = 1 / D * trans(I);
+		}
+		return I;
+	}
+	catch (string ex_info)
+	{
+		throw ("matrix inv(const matrix&):\n" + ex_info);
+	}
+}
+
+matrix trans(const matrix& A)
+{
+	int* nA = get_size(A);
+	matrix B(nA[1], nA[0]);
+	for (int i = 0; i < nA[1]; ++i)
+		for (int j = 0; j < nA[0]; ++j)
+			B(i, j) = A(j, i);
+	return B;
+}
+
+matrix pow(const matrix& A, int n)
+{
+	if (n < 0)
+		throw string("matrix pow(const matrix&,int):\nwykladnik potegi nie moze byc ujemny");
+	int* nA = get_size(A);
+	if (nA[0] != nA[1])
+		throw string("matrix pow(const matrix&,int):\npotegowanie jest mozliwe tylko dla macierzy kwadratowych");
+	matrix B = ident_mat(nA[0]);
+	for (int i = 1; i <= n; ++i)
+		B = B * A;
+	return B;
+}
+
+double norm(const matrix& A)
+{
+	int* nA = get_size(A);
+	if (nA[1] != 1)
+		throw string("double norm(const matrix&):\nnorma jest zdefiniowana tylko dla wektorow pionowych");
+	double N = 0;
+	for (int i = 0; i < nA[0]; ++i)
+		N += pow(A(i), 2);
+	return sqrt(N);
+}
+
+matrix hcat(const matrix& A, const matrix& B)
+{
+	int* nA = get_size(A);
+	int* nB = get_size(B);
+	if (nA[0] != nB[0])
+		throw string("matrix hcat(const matrix&,const matrix&):\nliczba wierszy macierzy musi byc taka sama");
+	matrix C(nA[0], nA[1] + nB[1]);
+	for (int i = 0; i < nA[0]; ++i)
+	{
+		for (int j = 0; j < nA[1]; ++j)
+			C(i, j) = A(i, j);
+		for (int j = 0; j < nB[1]; ++j)
+			C(i, j + nA[1]) = B(i, j);
+	}
+	return C;
+}
+
+matrix vcat(const matrix& A, const matrix& B)
+{
+	int* nA = get_size(A);
+	int* nB = get_size(B);
+	if (nA[1] != nB[1])
+		throw string("matrix vcat(const matrix&,const matrix&):\nliczba kolumn macierzy musi byc taka sama");
+	matrix C(nA[0] + nB[0], nA[1]);
+	for (int i = 0; i < nA[0]; ++i)
+		for (int j = 0; j < nA[1]; ++j)
+			C(i, j) = A(i, j);
+	for (int i = 0; i < nB[0]; ++i)
+		for (int j = 0; j < nB[1]; ++j)
+			C(i + nA[0], j) = B(i, j);
+	return C;
+}
+
+matrix get_col(const matrix& A, int mv)
+{
+	int* n = get_size(A);
+	if (mv >= n[1] || mv < 0)
+		throw string("matrix get_col(const matrix&,int):\nnumer kolmuny jest poza zakresem");
+	matrix B(n[0], 1);
+	for (int i = 0; i < n[0]; ++i)
+		B(i, 0) = A(i, mv);
+	return B;
+}
+
+matrix get_row(const matrix& A, int nv)
+{
+	int* n = get_size(A);
+	if (nv >= n[0] || nv < 0)
+		throw string("matrix get_row(const matrix&,int):\nnumer wiersza jest poza zakresem");
+	matrix B(1, n[1]);
+	for (int j = 0; j < n[1]; ++j)
+		B(0, j) = A(nv, j);
+	return B;
+}
+
+ostream& operator<<(ostream& OS, const matrix& A)
+{
+	int* nA = get_size(A);
+	ostringstream OSS;
+	string S;
+	string::size_type p;
+	for (int i = 0; ; ++i)
+	{
+		for (int j = 0; j < nA[1]; ++j)
+		{
+			OSS << A(i, j);
+			S = OSS.str();
+			OSS.str("");
+			p = S.find('.');
+			if (p != string::npos)
+				S[p] = SEP_SYMBOL;
+			OS << S << "; ";
+		}
+		if (i == nA[0] - 1)
+			return OS;
+		OS << endl;
+	}
+}
+
+istream& operator>>(istream& IS, matrix& A)
+{
+	istringstream ISS;
+	string S;
+	string::size_type p;
+	int* nA = get_size(A);
+	for (int i = 0; i < nA[0]; ++i)
+		for (int j = 0; j < nA[1]; ++j)
+		{
+			getline(IS, S, ';');
+			p = S.find(SEP_SYMBOL);
+			if (p != string::npos)
+				S[p] = '.';
+			ISS.str(S);
+			ISS >> A(i, j);
+			if (ISS.fail())
+				throw string("istream& operator>>(istream&,matrix&):\nblad podczas odczytu macierzy");
+			ISS.clear();
+			if (IS.eof())
+				throw string("istream& operator>>(istream&,matrix&):\nzbyt malo liczb");
+		}
+	return IS;
+}
+
+int* get_size(const matrix& A)
+{
+	int* s = new int[2]{ A.n, A.m };
+	return s;
+}
+
+int get_len(const matrix& A)
+{
+	if (A.m != 1)
+		throw string("int get_len(const matrix&):\ndlugosc jest zwracana tylko dla wektorow pionowych");
+	return A.n;
+}
+
+
+================================================================================
+FILE: src/ode_solver.cpp
+================================================================================
+
+// src/ode_solver.cpp
+//Ten plik nie powinien być edytowany
+
+#include"../include/ode_solver.h"
+
+matrix* solve_ode(matrix(*diff)(double, matrix, matrix, matrix), double t0, double dt, double tend, matrix Y0, matrix ud1, matrix ud2)
+{
+	try
+	{
+		int N = static_cast<int>(floor((tend - t0) / dt) + 1);
+		if (N < 2)
+			throw string("matrix* solve_ode(...):\nprzedzial czasu nie jest zdefiniowany poprawnie");
+		int* s = get_size(Y0);
+		if (s[1] != 1)
+			throw string("matrix* solve_ode(...):\nwarunek poczatkowy musi byc wektorem pionowym");
+		int n = s[0];
+		delete[]s;
+		matrix* S = new matrix[2]{ matrix(N,1), matrix(n,N) };
+		S[0](0) = t0;
+		for (int i = 0; i < n; ++i)
+			S[1](i, 0) = Y0(i);
+		matrix k1(n, 1), k2(n, 1), k3(n, 1), k4(n, 1);
+		for (int i = 1; i < N; ++i)
+		{
+			S[0](i) = S[0](i - 1) + dt;
+			k1 = dt * diff(S[0](i - 1), S[1][i - 1], ud1, ud2);
+			k2 = dt * diff(S[0](i - 1) + 0.5 * dt, S[1][i - 1] + 0.5 * k1, ud1, ud2);
+			k3 = dt * diff(S[0](i - 1) + 0.5 * dt, S[1][i - 1] + 0.5 * k2, ud1, ud2);
+			k4 = dt * diff(S[0](i - 1) + dt, S[1][i - 1] + k3, ud1, ud2);
+			for (int j = 0; j < n; ++j)
+				S[1](j, i) = S[1](j, i - 1) + (k1(j) + 2 * k2(j) + 2 * k3(j) + k4(j)) / 6;
+		}
+		S[1] = trans(S[1]);
+		return S;
+	}
+	catch (string ex_info)
+	{
+		throw ("matrix* solve_ode(...):\n" + ex_info);
+	}
+}
+
+
+================================================================================
+FILE: src/opt_alg.cpp
+================================================================================
+
+// src/opt_alg.cpp
+//opt_alg.cpp
+#include "../include/opt_alg.h"
+#include <fstream>
+#include <string>
+#include <cmath>
+#include <iostream>
+
+std::string resolvePath(std::string filename) {
+#ifdef DATA_DIR
+    return std::string(DATA_DIR) + filename;
+#else
+    return "data/" + filename;
+#endif
+}
+
+solution MC(matrix (*ff)(matrix, matrix, matrix), int N, matrix lb, matrix ub, double epsilon, int Nmax, matrix ud1,
+            matrix ud2) {
+    try {
+        solution Xopt;
+        while (true) {
+            Xopt = rand_mat(N);
+            for (int i = 0; i < N; ++i)
+                Xopt.x(i) = (ub(i) - lb(i)) * Xopt.x(i) + lb(i);
+            Xopt.fit_fun(ff, ud1, ud2);
+            if (Xopt.y < epsilon) {
+                Xopt.flag = 1;
+                break;
+            }
+            if (solution::f_calls > Nmax) {
+                Xopt.flag = 0;
+                break;
+            }
+        }
+        return Xopt;
+    } catch (string ex_info) {
+        throw ("solution MC(...):\n" + ex_info);
+    }
+}
+
+double *expansion(matrix (*ff)(matrix, matrix, matrix), double x0, double d, double alpha, int Nmax, matrix ud1,
+                  matrix ud2) {
+    try {
+        solution s0(x0);
+        s0.fit_fun(ff, ud1, ud2);
+
+        solution s1(x0 + d);
+        s1.fit_fun(ff, ud1, ud2);
+
+        if (s1.y == s0.y) {
+            return new double[2]{m2d(s0.x), m2d(s1.x)};
+        }
+
+        if (s1.y > s0.y) {
+            double original_s1_x = s1.x(0);
+            d = -d;
+            s1.x = x0 + d;
+            s1.fit_fun(ff, ud1, ud2);
+
+            if (s1.y >= s0.y) {
+                if (d > 0) return new double[2]{original_s1_x, s1.x(0)};
+                else return new double[2]{s1.x(0), original_s1_x};
+            }
+        }
+
+        solution s_prev = s1;
+        solution s_curr;
+        int i = 1;
+
+        while (true) {
+            if (solution::f_calls >= Nmax) {
+                throw string("Maximum number of calls to target function in method exceeded.");
+            }
+
+            // ZABEZPIECZENIE: Limit iteracji ekspansji (np. 100), aby uniknąć overflow lub nieskończonej pętli
+            if (i > 100) {
+                 throw string("Expansion interval limit exceeded.");
+            }
+
+            s_curr.x = x0 + pow(alpha, i) * d;
+            s_curr.fit_fun(ff, ud1, ud2);
+
+            if (s_curr.y >= s_prev.y) {
+                break;
+            }
+
+            s_prev = s_curr;
+            i++;
+        }
+
+        double *p = new double[2];
+        double x_prev_prev = (i == 1) ? x0 : (x0 + pow(alpha, i - 2) * d);
+
+        if (d > 0) {
+            p[0] = x_prev_prev;
+            p[1] = m2d(s_curr.x);
+        } else {
+            p[0] = m2d(s_curr.x);
+            p[1] = x_prev_prev;
+        }
+
+        return p;
+    } catch (string ex_info) {
+        throw ("double* expansion(...):\n" + ex_info);
+    }
+}
+
+solution fib(matrix (*ff)(matrix, matrix, matrix), double a, double b, double epsilon, matrix ud1, matrix ud2) {
+    try {
+        std::vector<long long> F;
+        F.push_back(1);
+        F.push_back(1);
+        int k = 1;
+        while (F.back() <= (b - a) / epsilon) {
+            F.push_back(F[k] + F[k - 1]);
+            k++;
+        }
+
+        solution A(a), B(b);
+        solution C(B.x(0) - static_cast<double>(F[k - 1]) / F[k] * (B.x(0) - A.x(0)));
+        solution D(A.x(0) + B.x(0) - C.x(0));
+        C.fit_fun(ff, ud1, ud2);
+        D.fit_fun(ff, ud1, ud2);
+
+        for (int i = 0; i <= k - 3; ++i) {
+            if (C.y < D.y) {
+                B = D;
+                D = C;
+                C.x = B.x - static_cast<double>(F[k - i - 2]) / F[k - i - 1] * (B.x - A.x);
+                C.fit_fun(ff, ud1, ud2);
+            } else {
+                A = C;
+                C = D;
+                D.x = A.x + B.x - C.x;
+                D.fit_fun(ff, ud1, ud2);
+            }
+        }
+
+        solution final_solution = (C.y < D.y) ? C : D;
+        final_solution.flag = 1;
+        return final_solution;
+    } catch (string ex_info) {
+        throw ("solution fib(...):\n" + ex_info);
+    }
+}
+
+solution lag(matrix (*ff)(matrix, matrix, matrix), double a, double b, double epsilon, double gamma, int Nmax,
+             matrix ud1, matrix ud2) {
+    try {
+        solution A(a), B(b), C((a + b) / 2.0);
+        A.fit_fun(ff, ud1, ud2);
+        B.fit_fun(ff, ud1, ud2);
+        C.fit_fun(ff, ud1, ud2);
+
+        solution D;
+        double d_prev = NAN;
+
+        while (true) {
+            if (solution::f_calls > Nmax) {
+                D.flag = 0;
+                return D;
+            }
+
+            double l = A.y(0) * (pow(B.x(0), 2) - pow(C.x(0), 2)) + B.y(0) * (pow(C.x(0), 2) - pow(A.x(0), 2)) + C.y(0)
+                       * (pow(A.x(0), 2) - pow(B.x(0), 2));
+            double m = A.y(0) * (B.x(0) - C.x(0)) + B.y(0) * (C.x(0) - A.x(0)) + C.y(0) * (A.x(0) - B.x(0));
+
+            if (m <= 0) {
+                throw string("Error in Lagrange's method: m <= 0. The parabola is directed in the wrong direction.");
+            }
+
+            double d_val = 0.5 * l / m;
+            D.x = d_val;
+
+            if (abs(B.x(0) - A.x(0)) < epsilon || (!isnan(d_prev) && abs(d_val - d_prev) < gamma)) {
+                D.flag = 1;
+                D.fit_fun(ff, ud1, ud2);
+                return D;
+            }
+
+            d_prev = d_val;
+            D.fit_fun(ff, ud1, ud2);
+
+            if (d_val > A.x(0) && d_val < C.x(0)) {
+                if (D.y < C.y) {
+                    B = C;
+                    C = D;
+                } else {
+                    A = D;
+                }
+            } else if (d_val > C.x(0) && d_val < B.x(0)) {
+                if (D.y < C.y) {
+                    A = C;
+                    C = D;
+                } else {
+                    B = D;
+                }
+            } else {
+                throw string("Error in Lagrange's method: the new point D fell outside the interval [A, B].");
+            }
+        }
+    } catch (string ex_info) {
+        throw ("solution lag(...):\n" + ex_info);
+    }
+}
+
+solution HJ(matrix (*ff)(matrix, matrix, matrix), matrix x0, double s, double alpha, double epsilon, int Nmax,
+            matrix ud1, matrix ud2) {
+    try {
+		std::ofstream log_file("hj_iterations.csv");
+		if (log_file.is_open()) {
+			log_file << "Iteration,x1*,x2*\\n";
+		}
+		int iter = 0;
+
+        solution XB(x0), X;
+        XB.fit_fun(ff, ud1, ud2);
+
+		if (log_file.is_open()) {
+			log_file << iter << "," << XB.x(0) << "," << XB.x(1) << "\\n";
+		}
+
+        do {
+            X = HJ_trial(ff, XB, s, ud1, ud2);
+            if (X.y < XB.y) {
+                solution X_prev;
+                do {
+                    X_prev = XB;
+                    XB = X;
+                    X.x = 2.0 * XB.x - X_prev.x;
+                    X = HJ_trial(ff, X, s, ud1, ud2);
+                    if(solution::f_calls > Nmax) break;
+                } while (X.y < XB.y);
+                X = XB;
+            } else {
+                s *= alpha;
+            }
+			iter++;
+			if (log_file.is_open()) {
+				log_file << iter << "," << XB.x(0) << "," << XB.x(1) << "\\n";
+			}
+            if(solution::f_calls > Nmax) {
+                X.flag = 0;
+                break;
+            }
+        } while (s > epsilon);
+
+		if (log_file.is_open()) {
+			log_file.close();
+		}
+
+        X.flag = 1;
+        return X;
+    } catch (string ex_info) {
+        throw ("solution HJ(...):\\n" + ex_info);
+    }
+}
+
+solution HJ_trial(matrix (*ff)(matrix, matrix, matrix), solution XB, double s, matrix ud1, matrix ud2) {
+    int n = get_len(XB.x);
+    solution X = XB;
+
+    for (int j = 0; j < n; ++j) {
+        X.x(j) += s;
+        X.fit_fun(ff, ud1, ud2);
+        if (X.y < XB.y) {
+            XB = X;
+        } else {
+            X.x(j) -= 2 * s;
+            X.fit_fun(ff, ud1, ud2);
+            if (X.y < XB.y) {
+                XB = X;
+            } else {
+                X.x(j) += s;
+            }
+        }
+    }
+    return XB;
+}
+
+solution Rosen(matrix (*ff)(matrix, matrix, matrix), matrix x0, matrix s0, double alpha, double beta, double epsilon,
+               int Nmax, matrix ud1, matrix ud2) {
+    try {
+		std::ofstream log_file("rosen_iterations.csv");
+		if (log_file.is_open()) {
+			log_file << "Iteration,x1*,x2*\\n";
+		}
+		int iter = 0;
+
+        int n = get_len(x0);
+        solution X(x0);
+        X.fit_fun(ff, ud1, ud2);
+
+		if (log_file.is_open()) {
+			log_file << iter << "," << X.x(0) << "," << X.x(1) << "\\n";
+		}
+
+        matrix s = s0;
+        matrix D = ident_mat(n);
+        matrix lambda(n, 1);
+        matrix p(n, 1);
+
+        do {
+            for (int j = 0; j < n; ++j) {
+                solution X_temp = X;
+                X_temp.x = X.x + s(j) * D[j];
+                X_temp.fit_fun(ff, ud1, ud2);
+
+                if (X_temp.y < X.y) {
+                    X = X_temp;
+                    lambda(j) += s(j);
+                    s(j) *= alpha;
+                } else {
+                    p(j) += 1;
+                    s(j) *= -beta;
+                }
+            }
+
+            bool change_basis = true;
+            for(int j=0; j<n; ++j) {
+                if(lambda(j) == 0 || p(j) == 0) {
+                    change_basis = false;
+                    break;
+                }
+            }
+
+            if (change_basis) {
+                matrix Q(n, n);
+                for(int j=0; j<n; ++j) {
+                    matrix L(n, 1);
+                    for(int k=j; k<n; ++k)
+                        L(k) = lambda(k);
+                    Q.set_col(D * L, j);
+                }
+
+                matrix v = Q[0];
+                D.set_col(v / norm(v), 0);
+
+                for (int j = 1; j < n; ++j) {
+                    matrix temp = Q[j];
+                    for (int k = 0; k < j; ++k) {
+                        temp = temp - (trans(Q[j]) * D[k])() * D[k];
+                    }
+                    v = temp;
+                    D.set_col(v / norm(v), j);
+                }
+                s = s0;
+                lambda = matrix(n,1,0.0);
+                p = matrix(n,1,0.0);
+            }
+
+			iter++;
+			if (log_file.is_open()) {
+				log_file << iter << "," << X.x(0) << "," << X.x(1) << "\\n";
+			}
+
+            if(solution::f_calls > Nmax) {
+                X.flag = 0;
+                break;
+            }
+
+        } while (norm(s) > epsilon);
+
+		if (log_file.is_open()) {
+			log_file.close();
+		}
+
+        X.flag = 1;
+        return X;
+    } catch (string ex_info) {
+        throw ("solution Rosen(...):\\n" + ex_info);
+    }
+}
+
+solution pen(matrix (*ff)(matrix, matrix, matrix), matrix x0, double c, double dc, double epsilon, int Nmax, matrix ud1,
+             matrix ud2) {
+    try {
+        solution Xopt;
+        return Xopt;
+    } catch (string ex_info) {
+        throw ("solution pen(...):\n" + ex_info);
+    }
+}
+
+solution golden(matrix (*ff)(matrix, matrix, matrix), double a, double b, double epsilon, int Nmax, matrix ud1,
+                matrix ud2) {
+    try {
+        solution Xopt;
+        return Xopt;
+    } catch (string ex_info) {
+        throw ("solution golden(...):\n" + ex_info);
+    }
+}
+
+solution EA(matrix (*ff)(matrix, matrix, matrix), int N, matrix lb, matrix ub, int mi, int lambda, matrix sigma0,
+            double epsilon, int Nmax, matrix ud1, matrix ud2) {
+    try {
+        solution Xopt;
+        return Xopt;
+    } catch (string ex_info) {
+        throw ("solution EA(...):\n" + ex_info);
+    }
+}
+
+solution sym_NM(matrix (*ff)(matrix, matrix, matrix), matrix x0, double s, double alpha, double beta, double gamma,
+                double delta, double epsilon, int Nmax, matrix ud1, matrix ud2) {
+    try {
+        int n = get_len(x0);
+        solution S[n + 1];
+
+        // 1. Inicjalizacja sympleksu
+        S[0].x = x0;
+        for (int i = 1; i <= n; ++i) {
+            matrix e(n, 1);
+            e(i - 1) = 1.0;
+            S[i].x = x0 + s * e;
+        }
+
+        do {
+            for (int i = 0; i <= n; ++i) {
+                S[i].fit_fun(ff, ud1, ud2);
+            }
+
+            int i_min = 0, i_max = 0;
+            for (int i = 1; i <= n; ++i) {
+                if (S[i].y < S[i_min].y) i_min = i;
+                if (S[i].y > S[i_max].y) i_max = i;
+            }
+
+            matrix p(n, 1);
+            for (int i = 0; i <= n; ++i) {
+                if (i != i_max) {
+                    p = p + S[i].x;
+                }
+            }
+            p = p / n;
+
+            solution p_odb = S[i_max];
+            p_odb.x = p + alpha * (p - S[i_max].x);
+            p_odb.fit_fun(ff, ud1, ud2);
+
+            if (p_odb.y < S[i_min].y) {
+                solution p_e = S[i_max];
+                p_e.x = p + gamma * (p_odb.x - p);
+                p_e.fit_fun(ff, ud1, ud2);
+                if (p_e.y < p_odb.y) {
+                    S[i_max] = p_e;
+                } else {
+                    S[i_max] = p_odb;
+                }
+            } else if (p_odb.y >= S[i_min].y) {
+                bool better_than_second_worst = true;
+                for (int i = 0; i <= n; i++) {
+                    if (i != i_max && p_odb.y > S[i].y) {
+                        better_than_second_worst = false;
+                        break;
+                    }
+                }
+
+                if (better_than_second_worst) {
+                    S[i_max] = p_odb;
+                } else {
+                    if (p_odb.y < S[i_max].y) {
+                        S[i_max] = p_odb;
+                    }
+                    solution p_z = S[i_max];
+                    p_z.x = p + beta * (S[i_max].x - p);
+                    p_z.fit_fun(ff, ud1, ud2);
+
+                    if (p_z.y >= S[i_max].y) {
+                        for (int i = 0; i <= n; ++i) {
+                            if (i != i_min) {
+                                S[i].x = delta * (S[i].x + S[i_min].x);
+                            }
+                        }
+                    } else {
+                        S[i_max] = p_z;
+                    }
+                }
+            }
+
+            double max_dist = 0;
+            for (int i = 0; i <= n; ++i) {
+                double dist = norm(S[i_min].x - S[i].x);
+                if (dist > max_dist) {
+                    max_dist = dist;
+                }
+            }
+            if (max_dist < epsilon || solution::f_calls > Nmax) {
+                S[0].flag = (solution::f_calls <= Nmax);
+                break;
+            }
+
+        } while (true);
+
+        int final_best_idx = 0;
+        for (int i = 1; i <= n; i++) {
+            if (S[i].y < S[final_best_idx].y) {
+                final_best_idx = i;
+            }
+        }
+        return S[final_best_idx];
+
+    } catch (string ex_info) {
+        throw ("solution sym_NM(...):\n" + ex_info);
+    }
+}
+
+// Funkcja pomocnicza: Złoty podział dla szukania kroku h
+double golden_search(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix d, matrix ud1, matrix ud2, double a, double b, double epsilon, int Nmax) {
+    double alpha = (sqrt(5.0) - 1.0) / 2.0;
+    double c = b - alpha * (b - a);
+    double d_point = a + alpha * (b - a);
+
+    matrix xc = x0 + c * d;
+    matrix xd = x0 + d_point * d;
+    double fc = m2d(ff(xc, ud1, ud2));
+    double fd = m2d(ff(xd, ud1, ud2));
+
+    int calls = 0;
+    while ((b - a) > epsilon && calls < Nmax) {
+        if (fc < fd) {
+            b = d_point;
+            d_point = c;
+            fd = fc;
+            c = b - alpha * (b - a);
+            xc = x0 + c * d;
+            fc = m2d(ff(xc, ud1, ud2));
+        } else {
+            a = c;
+            c = d_point;
+            fc = fd;
+            d_point = a + alpha * (b - a);
+            xd = x0 + d_point * d;
+            fd = m2d(ff(xd, ud1, ud2));
+        }
+        calls++;
+    }
+    return (a + b) / 2.0;
+}
+
+solution SD(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, matrix), matrix x0, double h0, double epsilon, int Nmax, matrix ud1, matrix ud2) {
+    try {
+        solution X(x0);
+        solution X_prev;
+        matrix d;
+        double h;
+
+        X.fit_fun(ff, ud1, ud2);
+
+        while (solution::f_calls < Nmax) {
+            d = -gf(X.x, ud1, ud2);
+
+            if (std::isnan(h0)) {
+                h = golden_search(ff, X.x, d, ud1, ud2, 0.0, 1.0, epsilon, Nmax);
+            } else {
+                h = h0;
+            }
+
+            X_prev = X;
+            X.x = X.x + h * d;
+            X.fit_fun(ff, ud1, ud2);
+
+            if (norm(X.x - X_prev.x) < epsilon) {
+                X.flag = 1;
+                break;
+            }
+        }
+
+        if (solution::f_calls >= Nmax) X.flag = 0;
+        return X;
+    } catch (string ex_info) {
+        throw ("solution SD(...):\n" + ex_info);
+    }
+}
+
+solution CG(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, matrix), matrix x0, double h0, double epsilon, int Nmax, matrix ud1, matrix ud2) {
+    try {
+        solution X(x0);
+        solution X_prev;
+        matrix d, d_prev, g, g_prev;
+        double h, beta;
+
+        X.fit_fun(ff, ud1, ud2);
+        g = gf(X.x, ud1, ud2);
+        d = -g;
+
+        while (solution::f_calls < Nmax) {
+             if (std::isnan(h0)) {
+                h = golden_search(ff, X.x, d, ud1, ud2, 0.0, 1.0, epsilon, Nmax);
+            } else {
+                h = h0;
+            }
+
+            X_prev = X;
+            X.x = X.x + h * d;
+            X.fit_fun(ff, ud1, ud2);
+
+            if (norm(X.x - X_prev.x) < epsilon) {
+                X.flag = 1;
+                break;
+            }
+
+            g_prev = g;
+            g = gf(X.x, ud1, ud2);
+
+            double nom = pow(norm(g), 2);
+            double den = pow(norm(g_prev), 2);
+            beta = nom / den;
+
+            d_prev = d;
+            d = -g + beta * d_prev;
+        }
+
+        if (solution::f_calls >= Nmax) X.flag = 0;
+        return X;
+    } catch (string ex_info) {
+        throw ("solution CG(...):\n" + ex_info);
+    }
+}
+
+solution Newton(matrix(*ff)(matrix, matrix, matrix), matrix(*gf)(matrix, matrix, matrix), matrix(*Hf)(matrix, matrix, matrix), matrix x0, double h0, double epsilon, int Nmax, matrix ud1, matrix ud2) {
+    try {
+        solution X(x0);
+        solution X_prev;
+        matrix d, g, H;
+        double h;
+
+        X.fit_fun(ff, ud1, ud2);
+
+        while (solution::f_calls < Nmax) {
+            g = gf(X.x, ud1, ud2);
+            H = Hf(X.x, ud1, ud2);
+            d = -inv(H) * g;
+
+            if (std::isnan(h0)) {
+                h = golden_search(ff, X.x, d, ud1, ud2, 0.0, 1.0, epsilon, Nmax);
+            } else {
+                h = h0;
+            }
+
+            X_prev = X;
+            X.x = X.x + h * d;
+            X.fit_fun(ff, ud1, ud2);
+
+            if (norm(X.x - X_prev.x) < epsilon) {
+                X.flag = 1;
+                break;
+            }
+        }
+
+        if (solution::f_calls >= Nmax) X.flag = 0;
+        return X;
+    } catch (string ex_info) {
+        throw ("solution Newton(...):\n" + ex_info);
+    }
+}
+
+static matrix (*powell_ff)(matrix, matrix, matrix) = nullptr;
+static matrix powell_x0;
+static matrix powell_d;
+static matrix powell_ud1;
+static matrix powell_ud2;
+
+matrix ff_powell_wrapper(matrix h, matrix ud1, matrix ud2) {
+    if (std::isnan(h(0))) return matrix(1e100);
+    matrix x = powell_x0 + h(0) * powell_d;
+    return powell_ff(x, powell_ud1, powell_ud2);
+}
+
+solution Powell(matrix(*ff)(matrix, matrix, matrix), matrix x0, double epsilon, int Nmax, matrix ud1, matrix ud2) {
+    try {
+        int n = get_len(x0);
+        matrix D = ident_mat(n);
+        solution P(x0);
+        P.fit_fun(ff, ud1, ud2);
+
+        powell_ff = ff;
+        powell_ud1 = ud1;
+        powell_ud2 = ud2;
+
+        while (solution::f_calls < Nmax) {
+            matrix P0 = P.x;
+
+            for (int i = 0; i < n; ++i) {
+                powell_x0 = P.x;
+                powell_d = get_col(D, i);
+
+                double* interval = nullptr;
+                solution h_opt;
+                bool success = false;
+
+                try {
+                    // ZMIANA: Krok 0.001 (kompromis dla Part A i Part B)
+                    interval = expansion(ff_powell_wrapper, 0.0, 0.001, 2.0, Nmax);
+
+                    if (interval != nullptr && !std::isnan(interval[0]) && !std::isnan(interval[1])) {
+                        h_opt = golden(ff_powell_wrapper, interval[0], interval[1], epsilon, Nmax);
+                        success = true;
+                    }
+                } catch (...) {
+                    success = false;
+                }
+
+                if (interval != nullptr) {
+                    delete[] interval;
+                    interval = nullptr;
+                }
+
+                if (success && !std::isnan(h_opt.x(0))) {
+                    P.x = P.x + h_opt.x(0) * powell_d;
+                }
+
+                if (solution::f_calls >= Nmax) {
+                    P.fit_fun(ff, ud1, ud2);
+                    P.flag = 0;
+                    return P;
+                }
+            }
+
+            if (norm(P.x - P0) < epsilon) {
+                P.fit_fun(ff, ud1, ud2);
+                P.flag = 1;
+                return P;
+            }
+
+            matrix new_dir = P.x - P0;
+            if (norm(new_dir) > 1e-9) {
+                matrix D_new(n, n);
+                for (int i = 0; i < n - 1; ++i) {
+                    D_new.set_col(get_col(D, i + 1), i);
+                }
+                D_new.set_col(new_dir, n - 1);
+                D = D_new;
+
+                powell_x0 = P.x;
+                powell_d = new_dir;
+
+                double* interval = nullptr;
+                try {
+                    // ZMIANA: Krok 0.001
+                    interval = expansion(ff_powell_wrapper, 0.0, 0.001, 2.0, Nmax);
+                    if (interval != nullptr && !std::isnan(interval[0]) && !std::isnan(interval[1])) {
+                         solution h_opt = golden(ff_powell_wrapper, interval[0], interval[1], epsilon, Nmax);
+                         if (!std::isnan(h_opt.x(0))) {
+                             P.x = P.x + h_opt.x(0) * new_dir;
+                         }
+                    }
+                } catch (...) {
+                    // Ignoruj błąd
+                }
+                if (interval != nullptr) delete[] interval;
+            }
+        }
+
+        P.fit_fun(ff, ud1, ud2);
+        P.flag = 0;
+        return P;
+
+    } catch (string ex_info) {
+        solution P(x0);
+        P.fit_fun(ff, ud1, ud2);
+        P.flag = -1;
+        return P;
+    }
+}
+
+
+================================================================================
+FILE: src/solution.cpp
+================================================================================
+
+// src/solution.cpp
+//Ten plik nie powinien być edytowany
+
+#include"../include/solution.h"
+
+int solution::f_calls = 0;
+int solution::g_calls = 0;
+int solution::H_calls = 0;
+
+void solution::clear_calls()
+{
+	f_calls = 0;
+	g_calls = 0;
+	H_calls = 0;
+}
+
+solution::solution(double L)
+{
+	x = L;
+	g = NAN;
+	H = NAN;
+	y = NAN;
+	ud = NAN;
+	flag = -1;
+}
+
+solution::solution(const matrix& A)
+{
+	x = A;
+	g = NAN;
+	H = NAN;
+	y = NAN;
+	ud = NAN;
+	flag = -1;
+}
+
+solution::solution(int n, double* A)
+{
+	try
+	{
+		x = matrix(n, A);
+		g = NAN;
+		H = NAN;
+		y = NAN;
+		ud = NAN;
+		flag = -1;
+	}
+	catch (string ex_info)
+	{
+		throw ("solution::solution(int,double*):\n" + ex_info);
+	}
+}
+
+solution::solution(const solution& A)
+{
+	x = A.x;
+	g = A.g;
+	H = A.H;
+	y = A.y;
+	if (!isnan(A.ud(0, 0)))
+		ud = A.ud;
+	flag = A.flag;
+}
+
+solution& solution::operator=(const solution& A)
+{
+	if (&A == this)
+		return *this;
+	x = A.x;
+	g = A.g;
+	H = A.H;
+	y = A.y;
+	if (!isnan(A.ud(0, 0)))
+		ud = A.ud;
+	flag = A.flag;
+	return *this;
+}
+
+matrix solution::fit_fun(matrix(*ff)(matrix, matrix, matrix), matrix ud1, matrix ud2)
+{
+	try
+	{
+		++f_calls;
+		y = ff(x, ud1, ud2);
+		return y;
+	}
+	catch (string ex_info)
+	{
+		throw ("matrix solution::fit_fun(...):\n" + ex_info);
+	}
+}
+
+matrix solution::grad(matrix(*gf)(matrix, matrix, matrix), matrix ud1, matrix ud2)
+{
+	try
+	{
+		++g_calls;
+		g = gf(x, ud1, ud2);
+		return g;
+	}
+	catch (string ex_info)
+	{
+		throw ("matrix solution::grad(...):\n" + ex_info);
+	}
+}
+
+matrix solution::hess(matrix(*Hf)(matrix, matrix, matrix), matrix ud1, matrix ud2)
+{
+	try
+	{
+		++H_calls;
+		H = Hf(x, ud1, ud2);
+		return H;
+	}
+	catch (string ex_info)
+	{
+		throw ("matrix solution::hess(...):\n" + ex_info);
+	}
+}
+
+ostream& operator<<(ostream& S, const solution& A)
+{
+	S << "x = " << A.x << endl;
+	S << "y = " << A.y << endl;
+	S << "f_calls = " << solution::f_calls << endl;
+	if (solution::g_calls > 0)
+		S << "g_calls = " << solution::g_calls << endl;
+	if (solution::H_calls > 0)
+		S << "H_calls = " << solution::H_calls << endl;
+	S << "Exit flag: " << A.flag << endl;
+	return S;
+}
+
+int get_dim(const solution& A)
+{
+	try
+	{
+		return get_len(A.x);
+	}
+	catch (string ex_info)
+	{
+		throw ("int get_dim(const solution&):\n" + ex_info);
+	}
+}
+
+
+================================================================================
+FILE: src/user_funs.cpp
+================================================================================
+
+// src/user_funs.cpp
+#include "../include/user_funs.h"
+#include <cmath>
+#include <vector>
+
+#define _USE_MATH_DEFINES
+// --- Lab 0 Functions ---
+
+// Objective function for the test case
+matrix ff0T(matrix x, matrix ud1, matrix ud2) {
+    matrix y; // y contains the value of the objective function
+    y = pow(x(0) - ud1(0), 2) + pow(x(1) - ud1(1), 2); // ud1 contains the coordinates of the sought optimum
+    return y;
+}
+
+// Objective function for the real-world problem (pendulum)
+matrix ff0R(matrix x, matrix ud1, matrix ud2) {
+    matrix y; // y contains the value of the objective function
+    matrix Y0 = matrix(2, 1), // Y0 contains initial conditions
+            MT = matrix(2, new double[2]{m2d(x), 0.5}); // MT contains the torque on the pendulum and its duration
+    matrix *Y = solve_ode(df0, 0, 0.1, 10, Y0, ud1, MT); // solve the differential equation
+    int n = get_len(Y[0]); // length of the solution
+    double teta_max = Y[1](0, 0); // find the maximum pendulum deflection
+    for (int i = 1; i < n; ++i)
+        if (teta_max < Y[1](i, 0))
+            teta_max = Y[1](i, 0);
+    y = abs(teta_max - m2d(ud1)); // value of the objective function (ud1 is the assumed maximum deflection)
+
+    // Correctly free memory to prevent leaks
+    delete[] Y;
+
+    return y;
+}
+
+// Differential equations for the pendulum model
+matrix df0(double t, matrix Y, matrix ud1, matrix ud2) {
+    matrix dY(2, 1); // define the vector of derivatives of the sought functions
+    double m = 1, l = 0.5, b = 0.5, g = 9.81; // define model parameters
+    double I = m * pow(l, 2);
+    dY(0) = Y(1); // derivative of position is velocity
+    dY(1) = ((t <= ud2(1)) * ud2(0) - m * g * l * sin(Y(0)) - b * Y(1)) / I; // derivative of velocity is acceleration
+    return dY;
+}
+
+
+// --- Lab 1 Functions ---
+
+// Test objective function for Lab 1
+matrix ff1T(matrix x, matrix ud1, matrix ud2) {
+    double val = x(0); // Extract the value from the matrix
+
+    // f(x) = -cos(0.1x) * exp(-(0.1x - 2*PI)^2) + 0.002 * (0.1x)^2
+    double term1 = -cos(0.1 * val) * exp(-pow(0.1 * val - 2 * M_PI, 2));
+    double term2 = 0.002 * pow(0.1 * val, 2);
+
+    matrix y(term1 + term2); // The result must be a matrix
+    return y;
+}
+
+
+// Objective function for the real-world problem
+matrix ff1R(matrix x, matrix ud1, matrix ud2) {
+    // Convert the cross-section area DA from cm^2 to m^2
+    // x(0) <-> 50 cm^2
+    double DA = x(0) * 1e-4;
+
+    // Initial conditions: [Volume in A, Volume in B, Temperature in B]
+    matrix Y0(3, 1);
+    Y0(0) = 5.0; // VA_start = 5 m^3
+    Y0(1) = 1.0; // VB_start = 1 m^3
+    Y0(2) = 20.0; // TB_start = 20 C
+
+    // Simulation and physical parameters
+    matrix params(1, 1);
+    params(0) = DA; // Pass DA to the differential function
+
+    // Solve the ordinary differential equation
+    matrix *Y = solve_ode(dff1R, 0, 1, 2000, Y0, NAN, params);
+
+    // Find the maximum temperature in tank B
+    int n = get_len(Y[0]);
+    double T_max = 0;
+    for (int i = 0; i < n; ++i) {
+        if (Y[1](i, 2) > T_max) {
+            T_max = Y[1](i, 2);
+        }
+    }
+
+    // Free the dynamically allocated memory
+    delete[] Y;
+
+    // Objective function: minimize the difference from 50°C
+    return abs(T_max - 50.0);
+    // -50.0
+}
+
+// Differential equations for the real-world problem
+// Differential equations for the real-world problem
+matrix dff1R(double t, matrix Y, matrix ud1, matrix ud2) {
+    // Physical parameters and constants
+    double PA = 2.0; // Base area of tank A [m^2]
+    double PB = 1.0; // Base area of tank B [m^2]
+    double g = 9.81; // Gravitational acceleration [m/s^2]
+    double a = 0.98; // Coefficient for fluid viscosity
+    double b = 0.63; // Coefficient for stream constriction
+    double TA_in = 95.0; // Temperature of water from tank A [C]
+    double TB_in_temp = 20.0; // Temperature of external inflow to B [C]
+    double Fin_B = 10.0 / 1000.0; // External inflow to B [10 l/s -> m^3/s]
+    double DB = 36.5665 * 1e-4; // Outflow area from B [cm^2 -> m^2]
+
+    double DA = ud2(0); // Cross-section area DA from parameters [m^2]
+
+    // Current states
+    double VA = Y(0);
+    double VB = Y(1);
+    double TB = Y(2);
+
+    // Calculate water column heights
+    double hA = VA / PA;
+    double hB = VB / PB;
+
+    // Flows based on Torricelli's law
+    double Fout_A = (hA > 0) ? a * b * DA * sqrt(2 * g * hA) : 0;
+    double Fout_B = (hB > 0) ? a * b * DB * sqrt(2 * g * hB) : 0;
+
+    // Differential equations
+    matrix dY(3, 1);
+
+
+    dY(0) = -Fout_A; // Change in volume in A (water flows OUT)
+    dY(1) = Fout_A + Fin_B - Fout_B; // Change in volume in B (water from A flows IN)
+    // -----------------------
+
+    if (abs(VB) < 1e-9) {
+        // Avoid division by zero if tank B is empty
+        dY(2) = 0;
+    } else {
+        dY(2) = (Fout_A * (TA_in - TB) + Fin_B * (TB_in_temp - TB)) / VB; // Change in temperature in B
+    }
+
+    return dY;
+}
+
+
+matrix ff2R(matrix x, matrix ud1, matrix ud2) {
+    // Zmienne optymalizacji to współczynniki wzmocnienia regulatora
+    double k1 = x(0);
+    double k2 = x(1);
+
+    // Stałe modelu i symulacji
+    double b = 0.25;
+    double mr = 1.0;
+    double mc = 5.0;
+    double l = 2.0;
+    double I = (1.0/3.0) * mr * pow(l, 2) + mc * pow(l, 2);
+    double aref = M_PI;
+    double wref = 0;
+
+    double t0 = 0.0;
+    double tend = 100.0;
+    double dt = 0.1;
+
+    // Warunki początkowe dla równania różniczkowego: [alpha(0), omega(0)]
+    matrix Y0(2, 1);
+    Y0(0) = 0.0; // Początkowy kąt
+    Y0(1) = 0.0; // Początkowa prędkość kątowa
+
+    // Przekazanie współczynników k1 i k2 do funkcji różniczkowej przez ud2
+    matrix ode_params(2, 1);
+    ode_params(0) = k1;
+    ode_params(1) = k2;
+
+    // Rozwiązanie równania różniczkowego
+    matrix* Y = solve_ode(df2R, t0, dt, tend, Y0, NAN, ode_params);
+
+    // Obliczenie funkcjonału jakości Q(k1, k2) metodą prostokątów
+    double Q = 0.0;
+    int num_steps = get_len(Y[0]);
+
+    for (int i = 0; i < num_steps; ++i) {
+        double current_alpha = Y[1](i, 0);
+        double current_omega = Y[1](i, 1);
+
+        // Obliczenie momentu siły M(t) w danym kroku
+        double M = k1 * (aref - current_alpha) + k2 * (wref - current_omega);
+
+        // Obliczenie wartości funkcji podcałkowej
+        double integrand = 10 * pow(aref - current_alpha, 2) + pow(wref - current_omega, 2) + pow(M, 2);
+
+        // Dodanie do sumy całkowej
+        Q += integrand * dt;
+    }
+
+    // Zwolnienie pamięci zaalokowanej przez solve_ode
+    delete[] Y;
+
+    // Funkcja celu zwraca obliczoną wartość Q
+    return matrix(Q);
+}
+
+
+matrix ff2T(matrix x, matrix ud1, matrix ud2) {
+    double x1 = x(0);
+
+    double x2 = x(1);
+
+    double val = pow(x1, 2) + pow(x2, 2) - cos(2.5 * M_PI * x1) - cos(2.5 * M_PI * x2) + 2;
+
+    return matrix(val);
+}
+
+matrix df2R(double t, matrix Y, matrix ud1, matrix ud2)
+{
+    // Model constants
+    double b = 0.25;  // Friction coefficient
+    double mr = 1.0;  // Mass of the arm
+    double mc = 5.0;  // Mass of the weight
+    double l = 2.0;   // Length of the arm
+    double I = (1.0/3.0) * mr * pow(l, 2) + mc * pow(l, 2); // Moment of inertia
+
+    // Control parameters (k1, k2) are passed via ud2
+    double k1 = ud2(0);
+    double k2 = ud2(1);
+
+    // Target values
+    double aref = M_PI;
+    double wref = 0;
+
+    // Current state from Y vector
+    double alpha = Y(0); // Current angle
+    double omega = Y(1); // Current angular velocity
+
+    // Calculate the torque M(t)
+    double M = k1 * (aref - alpha) + k2 * (wref - omega);
+
+    // Define the system of 2 first-order ODEs
+    matrix dY(2, 1);
+    dY(0) = omega; // d(alpha)/dt = omega
+    dY(1) = (M - b * omega) / I; // d(omega)/dt = (M - b*omega)/I
+
+    return dY;
+}
+
+// Testowa funkcja celu dla lab3
+matrix ff3T(matrix x, matrix ud1, matrix ud2)
+{
+    double x1 = x(0);
+    double x2 = x(1);
+
+    double term_in_sqrt = pow(x1 / M_PI, 2) + pow(x2 / M_PI, 2);
+    double term = M_PI * sqrt(term_in_sqrt);
+
+    // Warunek zabezpieczający przed dzieleniem przez zero, gdy x1=0 i x2=0
+    // Zgodnie z granicą sin(z)/z -> 1 dla z -> 0
+    if (abs(term) < 1e-9) {
+        return matrix(1.0);
+    }
+
+    return matrix(sin(term) / term);
+}
+
+
+// Funkcja celu z zewnętrzną funkcją kary
+matrix ff3T_zew(matrix x, matrix ud1, matrix ud2)
+{
+    // ud1(0) przechowuje parametr 'a'
+    // ud1(1) przechowuje współczynnik kary 'c'
+    double a = ud1(0);
+    double c = ud1(1);
+
+    // Wartość oryginalnej funkcji celu
+    matrix y_f = ff3T(x);
+
+    // Ograniczenia g(x) <= 0
+    double g1 = -x(0) + 1.0;
+    double g2 = -x(1) + 1.0;
+    double g3 = sqrt(pow(x(0), 2) + pow(x(1), 2)) - a;
+
+    // Obliczenie kary
+    double kara = c * (pow(max(0.0, g1), 2) + pow(max(0.0, g2), 2) + pow(max(0.0, g3), 2));
+
+    return y_f + kara;
+}
+
+// Funkcja celu z wewnętrzną funkcją kary
+matrix ff3T_wew(matrix x, matrix ud1, matrix ud2)
+{
+    // ud1(0) przechowuje parametr 'a'
+    // ud1(1) przechowuje współczynnik kary 'c'
+    double a = ud1(0);
+    double c = ud1(1);
+
+    // Ograniczenia g(x) <= 0
+    double g1 = -x(0) + 1.0;
+    double g2 = -x(1) + 1.0;
+    double g3 = sqrt(pow(x(0), 2) + pow(x(1), 2)) - a;
+
+    // Sprawdzenie, czy punkt leży w obszarze dopuszczalnym
+    // Jeśli nie, zwróć bardzo dużą wartość
+    if (g1 >= 0 || g2 >= 0 || g3 >= 0) {
+        return matrix(1e100); // Wartość "nieskończona"
+    }
+
+    // Wartość oryginalnej funkcji celu
+    matrix y_f = ff3T(x);
+
+    // Obliczenie kary
+    double kara = -c * (1.0 / g1 + 1.0 / g2 + 1.0 / g3);
+
+    return y_f + kara;
+}
+
+matrix dff3R(double t, matrix Y, matrix ud1, matrix ud2) {
+    // Y(0) = x, Y(1) = vx, Y(2) = y, Y(3) = vy
+    double x = Y(0);
+    double vx = Y(1);
+    double y = Y(2);
+    double vy = Y(3);
+
+    // Parametry fizyczne
+    double m = 0.6;   // kg
+    double r = 0.12;  // m
+    double C = 0.47;
+    double rho = 1.2; // kg/m^3
+    double g = 9.81;  // m/s^2
+    double S = M_PI * r * r;
+
+    // Omega jest przekazywana w ud1 (parametr sterujący, ale stały w czasie symulacji)
+    double omega = ud1(0);
+
+    // Siły oporu (zgodnie z instrukcją: 0.5 * C * rho * S * v * |v|)
+    double Dx = 0.5 * C * rho * S * vx * abs(vx);
+    double Dy = 0.5 * C * rho * S * vy * abs(vy);
+
+    // Siły Magnusa
+    double FMx = rho * vy * omega * M_PI * pow(r, 3);
+    double FMy = rho * vx * omega * M_PI * pow(r, 3);
+
+    // Równania ruchu
+    matrix dY(4, 1);
+    dY(0) = vx;
+    dY(1) = -(Dx + FMx) / m;
+    dY(2) = vy;
+    dY(3) = -(Dy + FMy) / m - g; // Grawitacja działa w dół (przeciwnie do osi Y)
+
+    return dY;
+}
+
+
+matrix ff3R_zew(matrix x, matrix ud1, matrix ud2) {
+    // Zmienne decyzyjne: x(0) = v0x, x(1) = omega
+    double v0x = x(0);
+    double omega = x(1);
+
+    // Parametry kary przekazywane w ud2 (ud2(0)=c)
+    double c = ud2(0);
+
+    // Warunki początkowe symulacji
+    // [x=0, vx=v0x, y=100, vy=0]
+    matrix Y0(4, 1);
+    Y0(0) = 0.0;
+    Y0(1) = v0x;
+    Y0(2) = 100.0;
+    Y0(3) = 0.0;
+
+    // Przekazujemy omegę do równania różniczkowego
+    matrix params(1, 1);
+    params(0) = omega;
+
+    // Symulacja: t_end = 7s, dt = 0.01s
+    matrix* Y = solve_ode(dff3R, 0, 0.01, 7, Y0, params, NAN);
+
+    // Analiza wyników symulacji
+    int n = get_len(Y[0]);
+    double x_end = 0.0; // Wartość x przy uderzeniu w ziemię (y=0)
+    double x_at_50 = 0.0; // Wartość x przy y=50m
+    bool hit_ground = false;
+    bool passed_50 = false;
+
+    // Szukamy momentu przejścia przez y=50 i uderzenia w ziemię
+    for (int i = 0; i < n; ++i) {
+        double current_y = Y[1](i, 2);
+        double current_x = Y[1](i, 0);
+
+        // Sprawdzenie przejścia przez 50m
+        if (!passed_50 && current_y <= 50.0) {
+            x_at_50 = current_x;
+            passed_50 = true;
+        }
+
+        // Sprawdzenie uderzenia w ziemię
+        if (!hit_ground && current_y <= 0.0) {
+            x_end = current_x;
+            hit_ground = true;
+            // Możemy przerwać pętlę, jeśli interesuje nas tylko pierwsze uderzenie
+             // break; // Opcjonalnie, ale solver i tak policzył całość
+        }
+    }
+
+    // Jeśli nie uderzyła w ziemię w ciągu 7s, bierzemy ostatni x (jako fallback)
+    if (!hit_ground) x_end = Y[1](n - 1, 0);
+    // Jeśli nie minęła 50m (dziwne przy spadku ze 100m), bierzemy start
+    if (!passed_50) x_at_50 = 0.0;
+
+    delete[] Y;
+
+    // --- Funkcja celu ---
+    // Maksymalizacja x_end => Minimalizacja -x_end
+    double f_val = -x_end;
+
+    // --- Ograniczenia ---
+    // 1. v0x w [-10, 10] => |v0x| - 10 <= 0
+    double g1 = abs(v0x) - 10.0;
+
+    // 2. omega w [-10, 10] => |omega| - 10 <= 0
+    double g2 = abs(omega) - 10.0;
+
+    // 3. Przy y=50m, x musi być w [3, 7] => odległość od 5 <= 2 => |x_at_50 - 5| - 2 <= 0
+    double g3 = abs(x_at_50 - 5.0) - 2.0;
+
+    // Kara zewnętrzna: c * suma(max(0, g_i)^2)
+    double penalty = c * (pow(max(0.0, g1), 2) + pow(max(0.0, g2), 2) + pow(max(0.0, g3), 2));
+
+    return matrix(f_val + penalty);
+}
+
+// ---  LAB 4 ---
+
+// Funkcja pomocnicza do wczytywania macierzy z plików z separatorami ';'
+matrix read_matrix_semicolon(string path, int rows, int cols) {
+    ifstream file(path);
+    if (!file.is_open()) throw string("Nie mozna otworzyc pliku: " + path);
+
+    matrix M(rows, cols);
+    string line, val_str;
+
+    for (int i = 0; i < rows; ++i) {
+        if (!getline(file, line)) break;
+        stringstream ss(line);
+        for (int j = 0; j < cols; ++j) {
+            if (!getline(ss, val_str, ';')) break;
+            try {
+                M(i, j) = stod(val_str);
+            } catch (...) {
+                M(i, j) = 0.0;
+            }
+        }
+    }
+    return M;
+}
+
+// Funkcja pomocnicza do obliczania dokladnosci klasyfikacji
+double calculate_accuracy(matrix theta, matrix X, matrix Y) {
+    int m = get_size(Y)[1]; // Liczba probek (100)
+    int correct = 0;
+    for (int i = 0; i < m; ++i) {
+        matrix xi = get_col(X, i);
+        double z = m2d(trans(theta) * xi);
+        double h = 1.0 / (1.0 + exp(-z)); // Sigmoid
+        int prediction = (h >= 0.5) ? 1 : 0;
+        if (prediction == (int)Y(0, i)) correct++;
+    }
+    return (double)correct / m * 100.0;
+}
+
+
+// Testowa funkcja celu: f(x) = 1/6*x1^6 - 1.05*x1^4 + 2*x1^2 + x2^2 + x1*x2
+matrix ff4T(matrix x, matrix ud1, matrix ud2) {
+    double x1 = x(0);
+    double x2 = x(1);
+    double y = (1.0/6.0)*pow(x1, 6) - 1.05*pow(x1, 4) + 2.0*pow(x1, 2) + pow(x2, 2) + x1*x2;
+    return matrix(y);
+}
+
+// Gradient testowej funkcji celu
+matrix gf4T(matrix x, matrix ud1, matrix ud2) {
+    double x1 = x(0);
+    double x2 = x(1);
+    matrix g(2, 1);
+    // df/dx1 = x1^5 - 4.2*x1^3 + 4*x1 + x2
+    g(0) = pow(x1, 5) - 4.2*pow(x1, 3) + 4.0*x1 + x2;
+    // df/dx2 = 2*x2 + x1
+    g(1) = 2.0*x2 + x1;
+    return g;
+}
+
+// Hesjan testowej funkcji celu
+matrix Hf4T(matrix x, matrix ud1, matrix ud2) {
+    double x1 = x(0);
+    double x2 = x(1);
+    matrix H(2, 2);
+    // d2f/dx1^2 = 5*x1^4 - 12.6*x1^2 + 4
+    H(0, 0) = 5.0*pow(x1, 4) - 12.6*pow(x1, 2) + 4.0;
+    // d2f/dx1dx2 = 1
+    H(0, 1) = 1.0;
+    // d2f/dx2dx1 = 1
+    H(1, 0) = 1.0;
+    // d2f/dx2^2 = 2
+    H(1, 1) = 2.0;
+    return H;
+}
+
+// Funkcja pomocnicza: sigmoid
+double sigmoid(double z) {
+    if (z > 20.0) return 1.0;
+    if (z < -20.0) return 0.0;
+    return 1.0 / (1.0 + exp(-z));
+}
+
+// Rzeczywista funkcja celu: Log-Loss
+// theta: wektor parametrów (3x1)
+// ud1: X (3x100) - macierz cech
+// ud2: Y (1x100) - wektor etykiet
+matrix ff4R(matrix theta, matrix ud1, matrix ud2) {
+    matrix X = ud1;
+    matrix Y = ud2;
+
+    // ZMIANA: Zamiast get_len(trans(Y)), używamy get_size(Y)
+    int* size = get_size(Y);
+    int m = size[1]; // Y jest 1xm, więc liczba próbek to drugi wymiar
+    delete[] size;
+
+    double J = 0.0;
+    for (int i = 0; i < m; ++i) {
+        matrix xi = get_col(X, i);       // i-ta kolumna X (3x1)
+        double yi = Y(0, i);             // i-ta etykieta
+
+        double z = m2d(trans(theta) * xi);
+        double h = sigmoid(z);
+
+        // Zabezpieczenie logarytmu
+        double eps = 1e-15;
+        if (h < eps) h = eps;
+        if (h > 1.0 - eps) h = 1.0 - eps;
+
+        J += yi * log(h) + (1.0 - yi) * log(1.0 - h);
+    }
+
+    return matrix(-J / m);
+}
+
+// Gradient rzeczywistej funkcji celu
+matrix gf4R(matrix theta, matrix ud1, matrix ud2) {
+    matrix X = ud1;
+    matrix Y = ud2;
+
+    // ZMIANA: Zamiast get_len(trans(Y)), używamy get_size(Y)
+    int* size = get_size(Y);
+    int m = size[1]; // Y jest 1xm
+    delete[] size;
+
+    matrix grad(3, 1); // Wektor zerowy 3x1
+
+    for (int i = 0; i < m; ++i) {
+        matrix xi = get_col(X, i);
+        double yi = Y(0, i);
+
+        double z = m2d(trans(theta) * xi);
+        double h = sigmoid(z);
+
+        // Sumowanie: (h(xi) - yi) * xi
+        grad = grad + (h - yi) * xi;
+    }
+
+    return grad / m;
+}
+
+// --- Funkcje Lab 5 ---
+
+// Testowa funkcja celu: F(x) = w*f1 + (1-w)*f2
+// --- Fragment pliku src/user_funs.cpp ---
+
+matrix ff5T(matrix x, matrix ud1, matrix ud2) {
+    double w = ud1(0);
+    double a = ud2(0);
+
+    // Zabezpieczenie przed x będącym NAN
+    if (std::isnan(x(0)) || std::isnan(x(1))) return matrix(1e100);
+
+    double x1 = x(0);
+    double x2 = x(1);
+
+    double f1 = a * (pow(x1 - 3.0, 2) + pow(x2 - 3.0, 2));
+    double f2 = (1.0 / a) * (pow(x1 + 3.0, 2) + pow(x2 + 3.0, 2));
+
+    return matrix(w * f1 + (1.0 - w) * f2);
+}
+
+// Rzeczywista funkcja celu: F(x) = w*f1 + (1-w)*f2 + Kara
+matrix ff5R(matrix x, matrix ud1, matrix ud2) {
+    matrix y;
+    double w = ud1(0); // Waga
+
+    // Zmienne decyzyjne (przeliczone na jednostki SI: metry)
+    double l = x(0); // długość [m]
+    double d = x(1); // średnica [m]
+
+    // Parametry stałe
+    double P = 2000.0;        // Siła [N] (2 kN)
+    double E = 1.2e11;        // Moduł Younga [Pa] (120 GPa)
+    double ro = 8920.0;       // Gęstość [kg/m^3]
+    double u_max = 0.0025;    // Max ugięcie [m] (2.5 mm)
+    double sigma_max = 300e6; // Max naprężenie [Pa] (300 MPa)
+
+    // Kryteria (Funkcje celu)
+    // f1: Masa [kg]
+    double mass = ro * l * M_PI * pow(d / 2.0, 2);
+
+    // f2: Ugięcie [m]
+    // u = (64 * P * l^3) / (3 * E * pi * d^4)
+    double deflection = (64.0 * P * pow(l, 3)) / (3.0 * E * M_PI * pow(d, 4));
+
+    // Naprężenie [Pa] (potrzebne do ograniczeń)
+    // sigma = (32 * P * l) / (pi * d^3)
+    double sigma = (32.0 * P * l) / (M_PI * pow(d, 3));
+
+    // Ograniczenia (Zewnętrzna funkcja kary)
+    // g_i(x) <= 0
+
+    double penalty = 0.0;
+    double c = 1e12; // Współczynnik kary (wysoki ze względu na różne rzędy wielkości)
+
+    // 1. Ograniczenia geometryczne
+    // l E [0.2, 1.0] m
+    double g1 = 0.2 - l;
+    double g2 = l - 1.0;
+    // d E [0.01, 0.05] m
+    double g3 = 0.01 - d;
+    double g4 = d - 0.05;
+
+    // 2. Ograniczenia fizyczne
+    // u <= u_max
+    double g5 = deflection - u_max;
+    // sigma <= sigma_max
+    double g6 = sigma - sigma_max;
+
+    // Sumowanie kar (kwadraty naruszeń)
+    // Używamy normalizacji ograniczeń, aby kara była bardziej zrównoważona
+    // (gdybyśmy nie normalizowali, sigma rzędu 10^8 zdominowałaby wszystko)
+
+    // Normalizacja naruszeń fizycznych: (val / limit) - 1 <= 0
+    double g5_norm = (deflection / u_max) - 1.0;
+    double g6_norm = (sigma / sigma_max) - 1.0;
+
+    // Geometryczne mają małe wartości, można je zostawić lub zwiększyć wagę
+    if (g1 > 0) penalty += c * pow(g1, 2);
+    if (g2 > 0) penalty += c * pow(g2, 2);
+    if (g3 > 0) penalty += c * pow(g3, 2);
+    if (g4 > 0) penalty += c * pow(g4, 2);
+
+    // Fizyczne znormalizowane mnożymy przez c
+    // (można dobrać inne c dla znormalizowanych, ale 1e12 powinno być ok,
+    //  bo f1 ~ 2-10, f2 ~ 0.001. Bez kary f2 jest pomijalne przy f1.
+    //  Ważne, by kara była większa niż zysk z minimalizacji funkcji)
+
+    double c_phys = 1e6; // Mniejszy współczynnik dla znormalizowanych
+    if (g5_norm > 0) penalty += c_phys * pow(g5_norm, 2);
+    if (g6_norm > 0) penalty += c_phys * pow(g6_norm, 2);
+
+    // Wartość funkcji ważonej + kara
+    y = w * mass + (1.0 - w) * deflection + penalty;
+    return y;
+}
+

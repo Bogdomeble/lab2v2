@@ -1,3 +1,4 @@
+// src/solution.cpp
 //Ten plik nie powinien być edytowany
 
 #include"../include/solution.h"

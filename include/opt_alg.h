@@ -1,3 +1,4 @@
+// include/opt_alg.h
 //Ten plik ~~nie~~ powinien być edytowany
 //
 // ^Akurat powinien, bo trzeba dodać dokumentację interfejsu,
