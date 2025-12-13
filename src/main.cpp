@@ -13,9 +13,34 @@ void test_real_problem_DA50();
 void lab2();
 void lab3();
 void lab4();
+void lab4_wykresy();
 void lab5();
 void lab6();
 
+double golden_search_local(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix d, matrix ud1, matrix ud2, double epsilon, int Nmax) {
+    double a = 0.0, b = 1.0;
+    double alpha = (sqrt(5.0) - 1.0) / 2.0;
+    double c = b - alpha * (b - a);
+    double d_point = a + alpha * (b - a);
+    matrix xc = x0 + c * d;
+    matrix xd = x0 + d_point * d;
+    double fc = m2d(ff(xc, ud1, ud2));
+    double fd = m2d(ff(xd, ud1, ud2));
+    int calls = 0;
+    while ((b - a) > epsilon && calls < Nmax) {
+        if (fc < fd) {
+            b = d_point; d_point = c; fd = fc;
+            c = b - alpha * (b - a); xc = x0 + c * d;
+            fc = m2d(ff(xc, ud1, ud2));
+        } else {
+            a = c; c = d_point; fc = fd;
+            d_point = a + alpha * (b - a); xd = x0 + d_point * d;
+            fd = m2d(ff(xd, ud1, ud2));
+        }
+        calls++;
+    }
+    return (a + b) / 2.0;
+}
 int main() {
     try {
 
@@ -25,8 +50,8 @@ int main() {
         //lab1_real();
         //lab2();
         //lab3();
-
         lab4();
+        lab4_wykresy();
     } catch (string EX_INFO) {
         cerr << "ERROR:\n";
         cerr << EX_INFO << endl << endl;
@@ -653,6 +678,7 @@ void lab3() {
 }
 
 void lab4() {
+    // lab4_wykresy();
     srand(time(nullptr));
 
     // ==========================================================
@@ -874,6 +900,107 @@ void lab5() {
 }
 
 void lab6() {
+}
+void lab4_wykresy() {
+    cout << "Generowanie danych do wykresow (trajektorie)..." << endl;
+    srand(time(nullptr));
+
+    // 1. Wybór jednego punktu startowego dla wszystkich wykresów
+    matrix x0(2, 1);
+    // Możesz tu wpisać konkretne wartości, żeby ładnie wyglądało na wykresie
+    // np. x0(0) = -1.5; x0(1) = 1.5;
+    x0(0) = -0.5 + (double)rand()/RAND_MAX * 3.0; // Losowy z [-0.5, 2.5]
+    x0(1) = -0.5 + (double)rand()/RAND_MAX * 3.0;
+
+    cout << "Punkt startowy: [" << x0(0) << ", " << x0(1) << "]" << endl;
+
+    ofstream file(resolvePath("lab4_trajektorie.csv"));
+    // Nagłówek: Metoda, Krok, Iteracja, x1, x2
+    file << "Metoda,Krok,Nr_Iteracji,x1,x2\n";
+
+    double steps[] = {0.05, 0.25, NAN};
+    string method_names[] = {"SD", "CG", "Newton"};
+    int Nmax = 200; // Do wykresów nie potrzebujemy tysięcy punktów
+    double epsilon = 1e-5;
+
+    // Pętle po metodach i krokach
+    for (int m = 0; m < 3; ++m) { // 0=SD, 1=CG, 2=Newton
+        for (double h_val : steps) {
+
+            string step_name = isnan(h_val) ? "Zmienny" : to_string(h_val);
+            string method_name = method_names[m];
+
+            // Inicjalizacja dla pojedynczego przebiegu
+            matrix x = x0;
+            matrix d, g, g_prev, H;
+            double h;
+            solution::clear_calls(); // Reset liczników (opcjonalne tutaj)
+
+            // Zapis punktu startowego (iteracja 0)
+            file << method_name << "," << step_name << ",0," << x(0) << "," << x(1) << "\n";
+
+            // Symulacja algorytmów "ręcznie" z zapisem każdego kroku
+            try {
+                // Pierwszy gradient (potrzebny dla wszystkich)
+                g = gf4T(x);
+                d = -g; // Dla SD i pierwszego kroku CG/Newton kierunek to -gradient
+
+                int k = 0;
+                while (k < Nmax) {
+                    // Wyznaczanie kierunku d w zależności od metody
+                    if (m == 0) { // SD
+                        d = -gf4T(x);
+                    }
+                    else if (m == 1) { // CG
+                        if (k > 0) {
+                            g_prev = g;
+                            g = gf4T(x);
+                            double beta = pow(norm(g), 2) / pow(norm(g_prev), 2);
+                            d = -g + beta * d;
+                        } else {
+                            // Pierwszy krok CG to SD
+                            g = gf4T(x);
+                            d = -g;
+                        }
+                    }
+                    else if (m == 2) { // Newton
+                        g = gf4T(x);
+                        H = Hf4T(x);
+                        d = -inv(H) * g;
+                    }
+
+                    // Wyznaczanie długości kroku h
+                    if (isnan(h_val)) {
+                        h = golden_search_local(ff4T, x, d, NAN, NAN, epsilon, 100);
+                    } else {
+                        h = h_val;
+                    }
+
+                    // Wykonanie kroku
+                    matrix x_prev = x;
+                    x = x + h * d;
+
+                    // Zapis do pliku
+                    k++;
+                    file << method_name << "," << step_name << "," << k << "," << x(0) << "," << x(1) << "\n";
+
+                    // Warunek stopu
+                    if (norm(x - x_prev) < epsilon) break;
+
+                    // Zabezpieczenie dla stałego kroku (żeby nie uciekło w nieskończoność)
+                    if (norm(x) > 100.0) break;
+                }
+            } catch (string& ex) {
+                // Ignorujemy błędy (np. osobliwa macierz), przerywamy trasę
+            } catch (...) {
+                // Inne błędy
+            }
+        }
+    }
+
+    file.close();
+    cout << "Plik lab4_trajektorie.csv zostal wygenerowany." << endl;
+    cout << "Uzyj tego pliku do narysowania wykresow w Excelu (Wstaw -> Wykres Punktowy)." << endl;
 }
 
 void test_real_problem_DA50()
