@@ -875,116 +875,132 @@ void lab4() {
  */
  void lab5() {
      srand(time(nullptr));
-
      double epsilon = 1e-5;
-     int Nmax = 2000; // Zwiększona liczba iteracji dla Powella
+     int Nmax = 2000;
 
      // ==========================================================
-     // CZĘŚĆ A: TESTOWA FUNKCJA CELU
+     // TABELA 1: FUNKCJA TESTOWA (wersja szeroka)
      // ==========================================================
-     cout << "--- LAB 5: Testowa funkcja celu ---" << endl;
+     cout << "Generowanie danych do Tabeli 1 (funkcja testowa)..." << endl;
 
-     // Wartości parametru 'a' zgodnie z instrukcją
-     vector<double> A_values = {1.0, 10.0, 100.0};
-
-     for (double a_val : A_values) {
-         cout << "Przetwarzanie dla a = " << a_val << "..." << endl;
-
-         // Tworzymy osobny plik dla każdej wartości parametru a
-         string filename = "lab5_test_a_" + to_string((int)a_val) + ".csv";
-         ofstream file(resolvePath(filename));
-
-         // Nagłówek: waga, zmienne decyzyjne, składowe funkcji celu (do wykresu Pareto)
-         file << "w,x1,x2,f1(x),f2(x),Weighted_Sum,f_calls\n";
-
-         // Pętla po wadze w od 0 do 1 z krokiem 0.01 (101 punktów)
-         for (double w = 0.0; w <= 1.0; w += 0.01) {
-
-             // Parametry przekazywane do funkcji celu
-             matrix ud1(1, 1); ud1(0) = w;      // Waga
-             matrix ud2(1, 1); ud2(0) = a_val;  // Parametr a
-
-             // Losowy punkt startowy z przedziału [-10, 10]
-             matrix x0(2, 1);
-             x0(0) = -10.0 + (double)rand() / RAND_MAX * 20.0;
-             x0(1) = -10.0 + (double)rand() / RAND_MAX * 20.0;
-
-             // Wywołanie optymalizacji metodą Powella
-             solution::clear_calls();
-             solution sol = Powell(ff5T, x0, epsilon, Nmax, ud1, ud2);
-
-             // Obliczenie wartości składowych f1 i f2 dla znalezionego punktu optymalnego
-             // Musimy to policzyć ręcznie, bo 'sol.y' zawiera sumę ważoną
-             double x1 = sol.x(0);
-             double x2 = sol.x(1);
-
-             double f1 = a_val * (pow(x1 - 3.0, 2) + pow(x2 - 3.0, 2));
-             double f2 = (1.0 / a_val) * (pow(x1 + 3.0, 2) + pow(x2 + 3.0, 2));
-
-             // Zapis do pliku
-             file << w << ","
-                  << x1 << "," << x2 << ","
-                  << f1 << "," << f2 << ","
-                  << sol.y(0) << ","
-                  << solution::f_calls << "\n";
-         }
-         file.close();
-         cout << "Wyniki zapisano do " << filename << endl;
+     ofstream t1(resolvePath("lab5_tabela1.csv"));
+     if (!t1.is_open()) {
+         cerr << "BLAD: Nie mozna otworzyc pliku lab5_tabela1.csv" << endl;
+         return;
      }
 
-     // ==========================================================
-     // CZĘŚĆ B: PROBLEM RZECZYWISTY (BELKA)
-     // ==========================================================
-     cout << "\n--- LAB 5: Problem rzeczywisty (Belka) ---" << endl;
+     // w; x1(0); x2(0); | a=1 (x1,x2,f1,f2,calls) | a=10 (...) | a=100 (...)
+     t1 << "w;x1(0);x2(0);"
+        << "a1_x1*;a1_x2*;a1_f1*;a1_f2*;a1_calls;"
+        << "a10_x1*;a10_x2*;a10_f1*;a10_f2*;a10_calls;"
+        << "a100_x1*;a100_x2*;a100_f1*;a100_f2*;a100_calls\n";
 
-     ofstream file_real(resolvePath("lab5_problem_rzeczywisty.csv"));
-     file_real << "w,l[mm],d[mm],Masa[kg],Ugiecie[mm],Naprezenie[MPa],Weighted_Sum,f_calls\n";
+     vector<double> A_values = {1.0, 10.0, 100.0};
 
-     // Stałe do weryfikacji ograniczeń (do zapisu w logach/debugowania)
-     double ro = 8920.0; // gęstość
-     double P = 2000.0;  // siła
-     double E = 1.2e11;  // moduł Younga
+     // Pętla po wadze w (od 0 do 1 co 0.01)
+     // Uwaga: używamy integera do pętli, żeby uniknąć błędów zaokrągleń float
+     for (int i = 0; i <= 100; ++i) {
+         double w = i / 100.0;
 
-     for (double w = 0.0; w <= 1.0; w += 0.01) {
-         matrix ud1(1, 1); ud1(0) = w;
-         matrix ud2 = NAN; // nieużywane w ff5R
-
-         // Punkt startowy losowy w dopuszczalnych granicach
-         // l: [200, 1000] mm -> [0.2, 1.0] m
-         // d: [10, 50] mm -> [0.01, 0.05] m
+         // 1. Losujemy punkt startowy (wspólny dla wszystkich 'a' w tym wierszu)
          matrix x0(2, 1);
-         x0(0) = 0.2 + (double)rand() / RAND_MAX * 0.8;   // l
-         x0(1) = 0.01 + (double)rand() / RAND_MAX * 0.04; // d
+         x0(0) = -10.0 + (double)rand() / RAND_MAX * 20.0;
+         x0(1) = -10.0 + (double)rand() / RAND_MAX * 20.0;
 
-         // Wywołanie optymalizacji
+         // Zapisujemy początek wiersza: w oraz punkt startowy
+         t1 << w << ";" << x0(0) << ";" << x0(1);
+
+         // 2. Obliczamy optymalizację dla a=1, a=10, a=100
+         for (double a_val : A_values) {
+             matrix ud1(1, 1); ud1(0) = w;
+             matrix ud2(1, 1); ud2(0) = a_val;
+
+             solution::clear_calls();
+             // Startujemy zawsze z tego samego x0 w ramach wiersza
+             solution sol = Powell(ff5T, x0, epsilon, Nmax, ud1, ud2);
+
+             // Obliczenie składowych f1 i f2 w punkcie optymalnym
+             double x1_opt = sol.x(0);
+             double x2_opt = sol.x(1);
+             double f1 = a_val * (pow(x1_opt - 3.0, 2) + pow(x2_opt - 3.0, 2));
+             double f2 = (1.0 / a_val) * (pow(x1_opt + 3.0, 2) + pow(x2_opt + 3.0, 2));
+
+             // Dopisujemy wyniki dla danego 'a' do wiersza
+             t1 << ";" << x1_opt << ";" << x2_opt
+                << ";" << f1 << ";" << f2
+                << ";" << solution::f_calls;
+         }
+         // Koniec wiersza w pliku
+         t1 << "\n";
+     }
+     t1.close();
+     cout << "Zapisano lab5_tabela1.csv" << endl;
+
+     // ==========================================================
+     // TABELA 2: PROBLEM RZECZYWISTY (Belka)
+     // ==========================================================
+     cout << "Generowanie danych do Tabeli 2 (problem rzeczywisty)..." << endl;
+
+     ofstream t2(resolvePath("lab5_tabela2.csv"));
+     if (!t2.is_open()) {
+         cerr << "BLAD: Nie mozna otworzyc pliku lab5_tabela2.csv" << endl;
+         return;
+     }
+
+     // w; l(0)[mm]; d(0)[mm]; l*[mm]; d*[mm]; masa*[kg]; ugiecie*[mm]; naprezenie*[MPa]; calls
+     t2 << "w;l(0)_mm;d(0)_mm;l*_mm;d*_mm;masa_kg;ugiecie_mm;naprezenie_MPa;calls\n";
+
+     // Parametry fizyczne do obliczeń "wynikowych" (poza funkcją celu)
+     double ro = 8920.0;
+     double P = 2000.0;
+     double E = 1.2e11;
+
+     for (int i = 0; i <= 100; ++i) {
+         double w = i / 100.0;
+
+         // Losowy punkt startowy (w metrach, bo tak działa solver)
+         // l: [0.2, 1.0], d: [0.01, 0.05]
+         matrix x0(2, 1);
+         x0(0) = 0.2 + (double)rand() / RAND_MAX * 0.8;
+         x0(1) = 0.01 + (double)rand() / RAND_MAX * 0.04;
+
+         // Dane do tabeli startowej (konwersja na mm)
+         double l0_mm = x0(0) * 1000.0;
+         double d0_mm = x0(1) * 1000.0;
+
+         // Optymalizacja
+         matrix ud1(1, 1); ud1(0) = w;
+         matrix ud2 = NAN;
+
          solution::clear_calls();
          solution sol = Powell(ff5R, x0, epsilon, Nmax, ud1, ud2);
 
-         // Rozpakowanie wyników (przeliczenie na jednostki czytelne dla inżyniera)
+         // Wyniki optymalne (w metrach)
          double l_opt = sol.x(0);
          double d_opt = sol.x(1);
 
-         // Obliczenie składowych kryteriów osobno (Masa i Ugięcie)
-         // Wzory z instrukcji (to samo co w ff5R, ale bez funkcji kary)
+         // Obliczenie parametrów fizycznych dla tabeli
          double mass = ro * l_opt * M_PI * pow(d_opt / 2.0, 2);
          double deflection = (64.0 * P * pow(l_opt, 3)) / (3.0 * E * M_PI * pow(d_opt, 4));
          double stress = (32.0 * P * l_opt) / (M_PI * pow(d_opt, 3));
 
-         // Konwersja do zapisu (mm, MPa) dla czytelności w Excelu
-         double l_mm = l_opt * 1000.0;
-         double d_mm = d_opt * 1000.0;
-         double u_mm = deflection * 1000.0;
-         double sigma_MPa = stress / 1e6;
+         // Konwersja jednostek do tabeli
+         double l_star_mm = l_opt * 1000.0;
+         double d_star_mm = d_opt * 1000.0;
+         double u_star_mm = deflection * 1000.0;
+         double stress_MPa = stress / 1e6;
 
-         file_real << w << ","
-                   << l_mm << "," << d_mm << ","
-                   << mass << "," << u_mm << "," << sigma_MPa << ","
-                   << sol.y(0) << ","
-                   << solution::f_calls << "\n";
+         // Zapis wiersza
+         t2 << w << ";"
+            << l0_mm << ";" << d0_mm << ";"
+            << l_star_mm << ";" << d_star_mm << ";"
+            << mass << ";" << u_star_mm << ";" << stress_MPa << ";"
+            << solution::f_calls << "\n";
      }
 
-     file_real.close();
-     cout << "Wyniki zapisano do lab5_problem_rzeczywisty.csv" << endl;
+     t2.close();
+     cout << "Zapisano lab5_tabela2.csv" << endl;
+     cout << "Gotowe. Pliki mozna otworzyc w Excelu." << endl;
  }
 
 void lab6() {
