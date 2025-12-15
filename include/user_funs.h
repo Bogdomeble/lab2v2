@@ -53,3 +53,5 @@ matrix ff5T(matrix x, matrix ud1, matrix ud2);
 /// Rzeczywista funkcja celu (Ważona suma z funkcją kary)
 /// ud1(0) = w (waga)
 matrix ff5R(matrix x, matrix ud1, matrix ud2);
+
+double golden_search_local(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix d, matrix ud1, matrix ud2, double epsilon, int Nmax);

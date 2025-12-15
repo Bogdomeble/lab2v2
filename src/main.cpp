@@ -1,4 +1,3 @@
-// src/main.cpp
 
 
 #include "../include/opt_alg.h"
@@ -17,30 +16,7 @@ void lab4_wykresy();
 void lab5();
 void lab6();
 
-double golden_search_local(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix d, matrix ud1, matrix ud2, double epsilon, int Nmax) {
-    double a = 0.0, b = 1.0;
-    double alpha = (sqrt(5.0) - 1.0) / 2.0;
-    double c = b - alpha * (b - a);
-    double d_point = a + alpha * (b - a);
-    matrix xc = x0 + c * d;
-    matrix xd = x0 + d_point * d;
-    double fc = m2d(ff(xc, ud1, ud2));
-    double fd = m2d(ff(xd, ud1, ud2));
-    int calls = 0;
-    while ((b - a) > epsilon && calls < Nmax) {
-        if (fc < fd) {
-            b = d_point; d_point = c; fd = fc;
-            c = b - alpha * (b - a); xc = x0 + c * d;
-            fc = m2d(ff(xc, ud1, ud2));
-        } else {
-            a = c; c = d_point; fc = fd;
-            d_point = a + alpha * (b - a); xd = x0 + d_point * d;
-            fd = m2d(ff(xd, ud1, ud2));
-        }
-        calls++;
-    }
-    return (a + b) / 2.0;
-}
+
 int main() {
     try {
 
@@ -50,8 +26,9 @@ int main() {
         //lab1_real();
         //lab2();
         //lab3();
-        lab4();
-        lab4_wykresy();
+        // lab4();
+        // lab4_wykresy();
+        lab5();
     } catch (string EX_INFO) {
         cerr << "ERROR:\n";
         cerr << EX_INFO << endl << endl;
@@ -896,8 +873,119 @@ void lab4() {
      cout << "Plik lab4_tabela3.csv gotowy." << endl;
  }
  */
-void lab5() {
-}
+ void lab5() {
+     srand(time(nullptr));
+
+     double epsilon = 1e-5;
+     int Nmax = 2000; // Zwiększona liczba iteracji dla Powella
+
+     // ==========================================================
+     // CZĘŚĆ A: TESTOWA FUNKCJA CELU
+     // ==========================================================
+     cout << "--- LAB 5: Testowa funkcja celu ---" << endl;
+
+     // Wartości parametru 'a' zgodnie z instrukcją
+     vector<double> A_values = {1.0, 10.0, 100.0};
+
+     for (double a_val : A_values) {
+         cout << "Przetwarzanie dla a = " << a_val << "..." << endl;
+
+         // Tworzymy osobny plik dla każdej wartości parametru a
+         string filename = "lab5_test_a_" + to_string((int)a_val) + ".csv";
+         ofstream file(resolvePath(filename));
+
+         // Nagłówek: waga, zmienne decyzyjne, składowe funkcji celu (do wykresu Pareto)
+         file << "w,x1,x2,f1(x),f2(x),Weighted_Sum,f_calls\n";
+
+         // Pętla po wadze w od 0 do 1 z krokiem 0.01 (101 punktów)
+         for (double w = 0.0; w <= 1.0; w += 0.01) {
+
+             // Parametry przekazywane do funkcji celu
+             matrix ud1(1, 1); ud1(0) = w;      // Waga
+             matrix ud2(1, 1); ud2(0) = a_val;  // Parametr a
+
+             // Losowy punkt startowy z przedziału [-10, 10]
+             matrix x0(2, 1);
+             x0(0) = -10.0 + (double)rand() / RAND_MAX * 20.0;
+             x0(1) = -10.0 + (double)rand() / RAND_MAX * 20.0;
+
+             // Wywołanie optymalizacji metodą Powella
+             solution::clear_calls();
+             solution sol = Powell(ff5T, x0, epsilon, Nmax, ud1, ud2);
+
+             // Obliczenie wartości składowych f1 i f2 dla znalezionego punktu optymalnego
+             // Musimy to policzyć ręcznie, bo 'sol.y' zawiera sumę ważoną
+             double x1 = sol.x(0);
+             double x2 = sol.x(1);
+
+             double f1 = a_val * (pow(x1 - 3.0, 2) + pow(x2 - 3.0, 2));
+             double f2 = (1.0 / a_val) * (pow(x1 + 3.0, 2) + pow(x2 + 3.0, 2));
+
+             // Zapis do pliku
+             file << w << ","
+                  << x1 << "," << x2 << ","
+                  << f1 << "," << f2 << ","
+                  << sol.y(0) << ","
+                  << solution::f_calls << "\n";
+         }
+         file.close();
+         cout << "Wyniki zapisano do " << filename << endl;
+     }
+
+     // ==========================================================
+     // CZĘŚĆ B: PROBLEM RZECZYWISTY (BELKA)
+     // ==========================================================
+     cout << "\n--- LAB 5: Problem rzeczywisty (Belka) ---" << endl;
+
+     ofstream file_real(resolvePath("lab5_problem_rzeczywisty.csv"));
+     file_real << "w,l[mm],d[mm],Masa[kg],Ugiecie[mm],Naprezenie[MPa],Weighted_Sum,f_calls\n";
+
+     // Stałe do weryfikacji ograniczeń (do zapisu w logach/debugowania)
+     double ro = 8920.0; // gęstość
+     double P = 2000.0;  // siła
+     double E = 1.2e11;  // moduł Younga
+
+     for (double w = 0.0; w <= 1.0; w += 0.01) {
+         matrix ud1(1, 1); ud1(0) = w;
+         matrix ud2 = NAN; // nieużywane w ff5R
+
+         // Punkt startowy losowy w dopuszczalnych granicach
+         // l: [200, 1000] mm -> [0.2, 1.0] m
+         // d: [10, 50] mm -> [0.01, 0.05] m
+         matrix x0(2, 1);
+         x0(0) = 0.2 + (double)rand() / RAND_MAX * 0.8;   // l
+         x0(1) = 0.01 + (double)rand() / RAND_MAX * 0.04; // d
+
+         // Wywołanie optymalizacji
+         solution::clear_calls();
+         solution sol = Powell(ff5R, x0, epsilon, Nmax, ud1, ud2);
+
+         // Rozpakowanie wyników (przeliczenie na jednostki czytelne dla inżyniera)
+         double l_opt = sol.x(0);
+         double d_opt = sol.x(1);
+
+         // Obliczenie składowych kryteriów osobno (Masa i Ugięcie)
+         // Wzory z instrukcji (to samo co w ff5R, ale bez funkcji kary)
+         double mass = ro * l_opt * M_PI * pow(d_opt / 2.0, 2);
+         double deflection = (64.0 * P * pow(l_opt, 3)) / (3.0 * E * M_PI * pow(d_opt, 4));
+         double stress = (32.0 * P * l_opt) / (M_PI * pow(d_opt, 3));
+
+         // Konwersja do zapisu (mm, MPa) dla czytelności w Excelu
+         double l_mm = l_opt * 1000.0;
+         double d_mm = d_opt * 1000.0;
+         double u_mm = deflection * 1000.0;
+         double sigma_MPa = stress / 1e6;
+
+         file_real << w << ","
+                   << l_mm << "," << d_mm << ","
+                   << mass << "," << u_mm << "," << sigma_MPa << ","
+                   << sol.y(0) << ","
+                   << solution::f_calls << "\n";
+     }
+
+     file_real.close();
+     cout << "Wyniki zapisano do lab5_problem_rzeczywisty.csv" << endl;
+ }
 
 void lab6() {
 }

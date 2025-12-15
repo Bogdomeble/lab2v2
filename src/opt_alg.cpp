@@ -1,4 +1,3 @@
-// src/opt_alg.cpp
 //opt_alg.cpp
 #include "../include/opt_alg.h"
 #include <fstream>

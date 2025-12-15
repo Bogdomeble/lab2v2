@@ -1,4 +1,3 @@
-// src/user_funs.cpp
 #include "../include/user_funs.h"
 #include <cmath>
 #include <vector>
@@ -311,7 +310,7 @@ matrix ff5T(matrix x, matrix ud1, matrix ud2) {
     double x1 = x(0); double x2 = x(1);
     double f1 = a * (pow(x1 - 3.0, 2) + pow(x2 - 3.0, 2));
     double f2 = (1.0 / a) * (pow(x1 + 3.0, 2) + pow(x2 + 3.0, 2));
-    return matrix(w * f1 + (1.0 - w) * f2);
+    return matrix(w * f1 + (1.0 - w) * f2 * 1000); //skalowanie trzeba dac 1000 razy wieksze
 }
 
 matrix ff5R(matrix x, matrix ud1, matrix ud2) {
@@ -341,4 +340,28 @@ matrix ff5R(matrix x, matrix ud1, matrix ud2) {
     if (g6_norm > 0) penalty += c_phys * pow(g6_norm, 2);
     y = w * mass + (1.0 - w) * deflection + penalty;
     return y;
+}
+double golden_search_local(matrix(*ff)(matrix, matrix, matrix), matrix x0, matrix d, matrix ud1, matrix ud2, double epsilon, int Nmax) {
+    double a = 0.0, b = 1.0;
+    double alpha = (sqrt(5.0) - 1.0) / 2.0;
+    double c = b - alpha * (b - a);
+    double d_point = a + alpha * (b - a);
+    matrix xc = x0 + c * d;
+    matrix xd = x0 + d_point * d;
+    double fc = m2d(ff(xc, ud1, ud2));
+    double fd = m2d(ff(xd, ud1, ud2));
+    int calls = 0;
+    while ((b - a) > epsilon && calls < Nmax) {
+        if (fc < fd) {
+            b = d_point; d_point = c; fd = fc;
+            c = b - alpha * (b - a); xc = x0 + c * d;
+            fc = m2d(ff(xc, ud1, ud2));
+        } else {
+            a = c; c = d_point; fc = fd;
+            d_point = a + alpha * (b - a); xd = x0 + d_point * d;
+            fd = m2d(ff(xd, ud1, ud2));
+        }
+        calls++;
+    }
+    return (a + b) / 2.0;
 }
